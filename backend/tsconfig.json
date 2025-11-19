@@ -10,6 +10,6 @@
     "typeRoots": ["./node_modules/@types", "./src/types"],
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "src/types/server.ts"],
   "exclude": ["node_modules", "api", "dist"]
 }
