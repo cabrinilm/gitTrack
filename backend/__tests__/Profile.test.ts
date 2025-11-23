@@ -12,7 +12,23 @@ const bearerToken = process.env.SUPABASE_BEARER_TOKEN!;
 
 describe("Profile routes", () => {
     let supabase: SupabaseClient<Database>;
+    let userId: string;
+    const testTtlePrefix = "test_event_";
 
+  const authHeader = {Authorization: `Bearer ${bearerToken}`};
+
+  const makeRequest = (
+    method: "post" | "get" | "patch" | "delete",
+    url: string,
+    body?: object,
+    headers: { [key: string]: string } = authHeader
+  ) => {
+    let req = request(app)[method](url).set("Content-Type", "application/json");
+    if (headers) req = req.set(headers);
+    if (body) req = req.send(body);
+    return req;
+  };
+
+  
 })
-
 
