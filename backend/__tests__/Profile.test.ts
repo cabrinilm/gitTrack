@@ -29,6 +29,17 @@ describe("Profile routes", () => {
     return req;
   };
 
-  
+  beforeAll(async () => {
+    if(!bearerToken) throw new Error("Missing SUPABASE_BEARER_TOKEN");
+
+    supabase = createClient<Database>(supabaseUrl, supabaseKey, {
+        global: {headers: authHeader},
+    });
+    const {
+data: {user},
+    } = await supabase.auth.getUser();
+  })
+
+
 })
 
