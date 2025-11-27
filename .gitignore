@@ -4,3 +4,4 @@ package-lock.json
 get-jwt.js
 obs.ts
 backend/src/types/supabase.ts
+coverage
