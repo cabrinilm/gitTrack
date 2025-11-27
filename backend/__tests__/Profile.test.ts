@@ -13,7 +13,7 @@ const bearerToken = process.env.SUPABASE_BEARER_TOKEN!;
 describe("Profile routes", () => {
   let supabase: SupabaseClient<Database>;
   let userId: string;
-  const testTtlePrefix = "test_event_";
+ const testUsernamePrefix = "test_user_";
 
   const authHeader = { Authorization: `Bearer ${bearerToken}` };
 
@@ -42,7 +42,7 @@ describe("Profile routes", () => {
     if (!user) throw new Error ("Test user not found");
      userId = user.id;
      
-     await supabase.from("profiles").delete().like("id", `${testTtlePrefix}`)
+     await supabase.from("profiles").delete().like("name", `${testUsernamePrefix}`)
   });
 
   afterEach(async () => {
@@ -51,8 +51,8 @@ describe("Profile routes", () => {
      await supabase
      .from("profiles")
      .delete()
-     .eq("creator_id", userId)
-     .like("title", `${testTtlePrefix}%`);
+     .eq("user_id", userId)
+     .like("name", `${testUsernamePrefix}%`);
      
   });
 
