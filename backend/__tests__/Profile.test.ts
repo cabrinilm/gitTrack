@@ -57,20 +57,22 @@ describe("Profile routes", () => {
   });
 
   describe("CREATE Profile", () => {
-    it("should create a profile for the authenticated user"), async () => {
+    it("should create a profile for the authenticated user", async () => {
       const body  = {
         username: `${testUsernamePrefix}first`,
         full_name: "Test User"
       };
 
-      const res = await makeRequest("post", "/api/profile", body);
+      const res = await makeRequest("post", "/api/profiles", body);
+
+      console.log(res.body)
 
       expect(res.status).toBe(201);
       expect(res.body).toHaveProperty("user_id", userId);
       expect(res.body).toHaveProperty("username", `${testUsernamePrefix}first`);
 
-    }
-  })
+    });
+  });
 
 
 
