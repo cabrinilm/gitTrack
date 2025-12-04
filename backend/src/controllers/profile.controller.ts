@@ -20,6 +20,18 @@ async createProfile(req: Request, res: Response): Promise<void>{
             return
         }
 
+        const profile = await profilesModel.createProfile(supabase, user_id,{name});
+
+        res.status(201).json(profile);
+    } catch (error) {
+        if( error instanceof Error && error.message.includes("already exists")) {
+            res.status(409).json({error: error.message})
+            return;
+        }
+
+        res.status(500).json({
+            error: error instanceof Error ? error.message : "Unknown error",
+        });
     }
 
 }
