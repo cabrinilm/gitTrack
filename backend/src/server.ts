@@ -6,7 +6,8 @@ import { supabase } from './services/supabaseClient';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+// const PORT = process.env.PORT || 3001;
+ const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
 
 
 app.use(cors());

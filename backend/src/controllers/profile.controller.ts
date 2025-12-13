@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-// import profileModel from "../models/profile.model" 
+import profilesModel from "../models/profile.model";
 
 
 class ProfilesController {
@@ -18,6 +18,10 @@ async createProfile(req: Request, res: Response): Promise<void>{
         if(!user_id){
             res.status(401).json({error : "Unauthorized: No user ID found"});
             return
+        }
+
+        if(!name) {
+            res.status(401).json({error : "Name is needed"})
         }
 
         const profile = await profilesModel.createProfile(supabase, user_id,{name});
