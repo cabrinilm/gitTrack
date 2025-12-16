@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import { createClient } from "@supabase/supabase-js";
-import { supabase } from "../services/supabaseClient";
+import { supabase } from "../service/supabaseClient";
 import type { Database } from "../types/supabase";
 
 
