@@ -1,4 +1,4 @@
-import { getProfile } from "../src/services/profile.service";
+import { getProfile } from "../../src/services/profile.service";
 
 describe("Profile Service", () => {
   it("should return the user's profile when it exists", async () => {
@@ -12,7 +12,7 @@ describe("Profile Service", () => {
       updated_at: new Date().toISOString(),
     };
 
-    // Mock manual do Supabase com .single()
+   
     const mockSupabase = {
       from: () => ({
         select: () => ({
@@ -25,10 +25,10 @@ describe("Profile Service", () => {
       }),
     };
 
-    // Chama a função
+
     const profile = await getProfile(mockSupabase as any, fakeUserId);
 
-    // Expectativas
+
     expect(profile).toEqual(fakeProfile);
     expect(profile.email).toBe("test@example.com");
     expect(profile.name).toBe("Test User");
