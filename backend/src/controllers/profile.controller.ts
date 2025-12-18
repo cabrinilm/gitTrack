@@ -1,15 +1,13 @@
 import type { Request, Response } from "express";
-import profilesModel from "../models/profile.model";
+import { getProfile } from "../services/profile.service";
 
 
-class ProfilesController {
 
-async createProfile(req: Request, res: Response): Promise<void>{
+export const getMyProfile = async (req: Request, res: Response): Promise<void> => {
     try{
         const supabase = req.supabase;
         const user_id = req.user?.id;
-        const name = req.body;
-
+      
         if(!supabase) {
             res.status(500).json({error: "Supabase client not found in request"});
             return 
@@ -20,11 +18,9 @@ async createProfile(req: Request, res: Response): Promise<void>{
             return
         }
 
-        if(!name) {
-            res.status(401).json({error : "Name is needed"})
-        }
+      
 
-        const profile = await profilesModel.createProfile(supabase, user_id,{name});
+        const profile = await getProfile(supabase, user_id);
 
         res.status(201).json(profile);
     } catch (error) {
@@ -42,4 +38,3 @@ async createProfile(req: Request, res: Response): Promise<void>{
 
 
 
-}
