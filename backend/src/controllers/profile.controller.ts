@@ -22,7 +22,7 @@ export const getMyProfile = async (req: Request, res: Response): Promise<void> =
 
         const profile = await getProfile(supabase, user_id);
 
-        res.status(201).json(profile);
+        res.status(200).json(profile);
     } catch (error) {
         if( error instanceof Error && error.message.includes("already exists")) {
             res.status(409).json({error: error.message})
