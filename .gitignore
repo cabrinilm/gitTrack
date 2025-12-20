@@ -2,6 +2,6 @@
 node_modules/
 package-lock.json
 get-jwt.js
-obs.ts
+obs.md
 backend/src/types/supabase.ts
 coverage

@@ -1,7 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "../types/supabase";
-
-export type Profile = Database["public"]["Tables"]["profiles"]["Row"]
+export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
 export async function getProfile(
     supabase: SupabaseClient<Database>,
