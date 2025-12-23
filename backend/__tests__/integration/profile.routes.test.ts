@@ -1,10 +1,11 @@
 import request from "supertest";
 import app from "../../src/server";
 import { getProfile } from "../../src/services/profile.service";
-import { supabase } from "../../src/services/supabaseClient"; // importe o supabase global
+import { supabase } from "../../src/services/supabaseClient"; 
 
 jest.mock("../../src/services/profile.service");
-jest.mock("../../src/services/supabaseClient"); // mocka o supabase global
+jest.mock("../../src/services/supabaseClient"); 
+
 
 describe("GET /api/profile", () => {
   it("should return 200 and the user's profile when authenticated", async () => {
@@ -12,13 +13,13 @@ describe("GET /api/profile", () => {
       id: "123e4567-e89b-12d3-a456-426614174000",
       email: "test@example.com",
       name: "Test User",
-      created_at: "2025-12-20T00:00:00Z", // string ISO qualquer
+      created_at: "2025-12-20T00:00:00Z", 
       updated_at: "2025-12-20T00:00:00Z",
     };
 
     (getProfile as jest.Mock).mockResolvedValue(fakeProfile);
 
-    // Mock da validação do token
+  
     (supabase.auth.getUser as jest.Mock).mockResolvedValue({
       data: { user: { id: "123e4567-e89b-12d3-a456-426614174000" } },
       error: null,
@@ -29,7 +30,7 @@ describe("GET /api/profile", () => {
       .set("Authorization", "Bearer any-fake-token")
       .expect(200);
 
-    // Aqui usamos o matcher para as datas
+  
     expect(response.body).toEqual({
       id: fakeProfile.id,
       email: fakeProfile.email,
@@ -37,5 +38,17 @@ describe("GET /api/profile", () => {
       created_at: expect.any(String),
       updated_at: expect.any(String),
     });
+  });
+  it.only("should return 401 if no token is provided", async () => {
+   
+    const response = await request(app)
+      .get("/api/profile")
+      .expect(401);
+
+  
+    expect(response.status).toBe(401);
+    expect(response.body.error).toEqual("No token provided")
+    
+    
   });
 });
