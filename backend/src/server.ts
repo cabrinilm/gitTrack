@@ -1,7 +1,7 @@
 import express, { Request, Response, NextFunction } from "express";
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { getMyProfile } from './controllers/profile.controller';
+import { getMyProfile, updateMyProfile } from './controllers/profile.controller';
 import { authMiddleware } from './middleware/auth';
 
 
@@ -15,7 +15,7 @@ app.use(express.json());
 app.use("/api", authMiddleware);
 
 app.get("/api/profile", getMyProfile)
-
+app.post("/api/profile", updateMyProfile)
 
 export default app; 
 
