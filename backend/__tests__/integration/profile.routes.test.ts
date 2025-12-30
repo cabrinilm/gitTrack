@@ -51,7 +51,7 @@ describe("GET /api/profile", () => {
     
     
   });
-  it.only("should return 404 if profile not found", async () => {
+  it("should return 404 if profile not found", async () => {
     
     (getProfile as jest.Mock).mockResolvedValue(null);
   
