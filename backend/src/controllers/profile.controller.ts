@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import { getProfile, updateProfile } from "../services/profile.service";
+import { updateProfileSchema } from "../schemas/profile.schema";
 
 export const getMyProfile = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -34,27 +35,43 @@ export const getMyProfile = async (req: Request, res: Response): Promise<void> =
 };
 
 
- export const updateMyProfile = async (req: Request, res: Response): Promise<void> => {
+
+export const updateMyProfile = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const supabase = req.supabase;
     const userId = req.user?.id;
-    const body = req?.body; 
 
     if (!supabase) {
-      res.status(500).json({ error: "Supabase client not found in request" });
+      res
+        .status(500)
+        .json({ error: "Supabase client not found in request" });
       return;
     }
 
     if (!userId) {
-      res.status(401).json({ error: "Unauthorized: No user ID found" });
+      res.status(401).json({ error: "Unauthorized" });
       return;
     }
 
-    if(!body) {
-      res.status(500).json({error: "Not possible"})
+    // ✅ Zod validation (borda do sistema)
+    const parsed = updateProfileSchema.safeParse(req.body);
+
+    if (!parsed.success) {
+      res.status(400).json({
+        error: "Invalid request body",
+        details: parsed.error.format(),
+      });
+      return;
     }
 
-    const profile =  await updateProfile(supabase, userId, body)
+    const profile = await updateProfile(
+      supabase,
+      userId,
+      parsed.data
+    );
 
     if (!profile) {
       res.status(404).json({ error: "Profile not found" });
@@ -62,14 +79,10 @@ export const getMyProfile = async (req: Request, res: Response): Promise<void> =
     }
 
     res.status(200).json(profile);
-    return;
   } catch (error) {
     res.status(500).json({
-      error: "Failed to fetch profile",
+      error: "Failed to update profile",
       details: error instanceof Error ? error.message : "Unknown error",
     });
-  
-
   }
- }
-
+};
