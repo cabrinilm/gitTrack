@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { getProfile, updateProfile } from "../services/profile.service";
 import { updateProfileSchema } from "../schemas/profile.schema";
+import { z } from "zod"
 
 export const getMyProfile = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -56,15 +57,15 @@ export const updateMyProfile = async (
       return;
     }
 
-    // ✅ Zod validation (borda do sistema)
+    
     const parsed = updateProfileSchema.safeParse(req.body);
-
+   
     if (!parsed.success) {
-      res.status(400).json({
+       res.status(400).json({
         error: "Invalid request body",
-        details: parsed.error.format(),
+        details: z.treeifyError(parsed.error),
       });
-      return;
+      return
     }
 
     const profile = await updateProfile(
