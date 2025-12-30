@@ -39,16 +39,16 @@ describe("GET /api/profile", () => {
       updated_at: expect.any(String),
     });
   });
-  it.only("should return 401 if no token is provided", async () => {
+  it("should return 401 if no token is provided", async () => {
    
     const response = await request(app)
       .get("/api/profile")
       .expect(401);
 
   
-    expect(response.status).toBe(401);
     expect(response.body.error).toEqual("No token provided")
     
     
   });
+  it("should return 403 if ")
 });
