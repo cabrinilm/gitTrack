@@ -3,6 +3,7 @@ import app from "../../src/server";
 import { getProfile } from "../../src/services/profile.service";
 import { supabase } from "../../src/services/supabaseClient"; 
 
+
 jest.mock("../../src/services/profile.service");
 jest.mock("../../src/services/supabaseClient"); 
 
@@ -50,5 +51,21 @@ describe("GET /api/profile", () => {
     
     
   });
-  it("should return 403 if ")
+  it.only("should return 404 if profile not found", async () => {
+    
+    (getProfile as jest.Mock).mockResolvedValue(null);
+  
+   
+    (supabase.auth.getUser as jest.Mock).mockResolvedValue({
+      data: { user: { id: "123..." } },
+      error: null,
+    });
+  
+    const response = await request(app)
+      .get("/api/profile")
+      .set("Authorization", "Bearer fake-token")
+      .expect(404);
+  
+    expect(response.body.error).toBe("Profile not found");
+  });
 });

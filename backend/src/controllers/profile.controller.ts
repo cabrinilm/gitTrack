@@ -17,6 +17,11 @@ export const getMyProfile = async (req: Request, res: Response): Promise<void> =
     }
 
     const profile = await getProfile(supabase, userId);
+      
+    if (!profile) {
+      res.status(404).json({ error: "Profile not found" });
+      return;
+    }
 
     res.status(200).json(profile);
     return;
