@@ -82,8 +82,7 @@ export const updateMyProfile = async (
     res.status(200).json(profile);
   } catch (error) {
     res.status(500).json({
-      error: "Failed to update profile",
-      details: error instanceof Error ? error.message : "Unknown error",
+      error: "Failed to update profile"
     });
   }
 };
