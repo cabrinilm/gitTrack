@@ -99,5 +99,31 @@ describe("POST /api/profile", () => {
     const response = await request(app).post("/api/profile").expect(401);
 
     expect(response.body.error).toEqual("No token provided");
-  })
+  });
+  it.only("should return 404 if profile does not exist", async () => {
+    const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
+  
+    const updates = {
+      name: "New Name",
+    };
+  
+    
+    (updateProfile as jest.Mock).mockRejectedValue(
+      new Error("Profile not found")
+    );
+  
+   
+    (supabase.auth.getUser as jest.Mock).mockResolvedValue({
+      data: { user: { id: fakeUserId } },
+      error: null,
+    });
+  
+    const response = await request(app)
+      .post("/api/profile")
+      .set("Authorization", "Bearer fake-token")
+      .send(updates)
+      .expect(404);
+   
+    expect(response.body.error).toBe("Profile not found");
+  });
 });
