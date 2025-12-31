@@ -100,7 +100,7 @@ describe("POST /api/profile", () => {
 
     expect(response.body.error).toEqual("No token provided");
   });
-  it.only("should return 404 if profile does not exist", async () => {
+  it("should return 404 if profile does not exist", async () => {
     const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
   
     const updates = {
@@ -125,5 +125,24 @@ describe("POST /api/profile", () => {
       .expect(404);
    
     expect(response.body.error).toBe("Profile not found");
+  });
+  it.only("should return 400 if name is invalid (too long)", async () => {
+    const invalidUpdate = {
+      name: "A".repeat(51)
+    };
+  
+    (supabase.auth.getUser as jest.Mock).mockResolvedValue({
+      data: { user: { id: "123..." } },
+      error: null,
+    });
+  
+    const response = await request(app)
+      .post("/api/profile")
+      .set("Authorization", "Bearer fake-token")
+      .send(invalidUpdate)
+      .expect(400);
+  
+    expect(response.body.error).toBe("Invalid request body");
+    // expect(response.body.details).toContain("Name must be at most 50 characters");
   });
 });

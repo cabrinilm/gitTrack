@@ -121,7 +121,7 @@ describe("Profile GET", () => {
 
       expect(result).toEqual(expectedProfile);
     });
-    it.only("should throw an error if profile is not found", async () => {
+    it("should throw an error if profile is not found", async () => {
       const existingUserId = "123e4567-e89b-12d3-a456-426614174000";
       const notFoundUserId = "123e4567-e89b-12d3-a456-426614174123";
 

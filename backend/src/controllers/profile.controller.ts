@@ -83,8 +83,8 @@ export const updateMyProfile = async (
     if (error instanceof Error && error.message === "Profile not found") {
       res.status(404).json({ error: "Profile not found" });
       return;
-    }
-  
+    } 
+    
     res.status(500).json({ error: "Failed to update profile" });
   }
 };
