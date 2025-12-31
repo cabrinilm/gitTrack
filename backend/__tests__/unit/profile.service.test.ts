@@ -3,7 +3,7 @@ import type { Profile } from "../../src/services/profile.service";
 import { getProfile, updateProfile } from "../../src/services/profile.service";
 
 
-describe("Profile Service", () => {
+describe("Profile GET", () => {
   it("should return the user's profile when it exists", async () => {
     const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
   
@@ -74,7 +74,7 @@ describe("Profile Service", () => {
 
   })
   describe("Profile POST",  () => {
-    it.only("should update the profile name and return the updated profile", async () => {
+    it("should update the profile name and return the updated profile", async () => {
       const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
     
       const initialProfile = {
@@ -116,5 +116,45 @@ describe("Profile Service", () => {
     
       expect(result).toEqual(expectedProfile);
     });
+    it.only("should return null if profile is not found", async () => {
+      const existingUserId = "123e4567-e89b-12d3-a456-426614174000";
+      const notFoundUserId = "123e4567-e89b-12d3-a456-426614174123";
+    
+      const initialProfile = {
+        id: existingUserId,
+        email: "test@example.com",
+        name: "Old Name",
+        created_at: "2025-01-01T00:00:00Z",
+        updated_at: "2025-01-01T00:00:00Z",
+      };
+    
+      const updates = {
+        name: "New Name",
+      };
+    
+     
+      const mockSupabase = {
+        from: () => ({
+          update: (body: Partial<Profile>) => ({
+            eq: (col: string, val: string) => ({
+              select: () => ({
+                single: async () => {
+                  if (val === existingUserId) {
+                    return { data: { ...initialProfile, ...body, updated_at: new Date().toISOString() }, error: null };
+                  }
+                  return { data: null, error: null };
+                },
+              }),
+            }),
+          }),
+        }),
+      };
+    
+      const result = await updateProfile(mockSupabase as any, notFoundUserId, updates);
+    
+      expect(result).toBeNull();
+
+
+    })
   })
 });
