@@ -126,7 +126,7 @@ describe("POST /api/profile", () => {
    
     expect(response.body.error).toBe("Profile not found");
   });
-  it.only("should return 400 if name is invalid (too long)", async () => {
+  it("should return 400 if name is invalid (too long)", async () => {
     const invalidUpdate = {
       name: "A".repeat(51)
     };
