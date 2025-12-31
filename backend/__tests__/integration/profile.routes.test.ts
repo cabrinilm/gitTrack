@@ -95,4 +95,9 @@ describe("POST /api/profile", () => {
 
     expect(response.body).toEqual(expectedProfile);
   });
+  it("should return 401 if no token is provided", async () => {
+    const response = await request(app).post("/api/profile").expect(401);
+
+    expect(response.body.error).toEqual("No token provided");
+  })
 });
