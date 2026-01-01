@@ -62,7 +62,7 @@ export const updateMyProfile = async (
    
     if (!parsed.success) {
        res.status(400).json({
-        error: "Invalid request body",
+        error: "Invalid name",
         details: z.treeifyError(parsed.error),
       });
       return

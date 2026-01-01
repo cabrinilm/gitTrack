@@ -15,7 +15,7 @@ app.use(express.json());
 app.use("/api", authMiddleware);
 
 app.get("/api/profile", getMyProfile)
-app.post("/api/profile", updateMyProfile)
+app.patch("/api/profile", updateMyProfile)
 
 export default app; 
 

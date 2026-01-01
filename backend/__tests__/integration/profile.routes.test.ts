@@ -58,7 +58,7 @@ describe("GET /api/profile", () => {
   });
 });
 
-describe("POST /api/profile", () => {
+describe("PATCH /api/profile", () => {
   it("should return 200 and the profile updated", async () => {
     const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
 
@@ -88,7 +88,7 @@ describe("POST /api/profile", () => {
     });
 
     const response = await request(app)
-      .post("/api/profile")
+      .patch("/api/profile")
       .set("Authorization", "Bearer any-fake-token")
       .send(update)
       .expect(200);
@@ -102,47 +102,70 @@ describe("POST /api/profile", () => {
   });
   it("should return 404 if profile does not exist", async () => {
     const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
-  
+
     const updates = {
       name: "New Name",
     };
-  
-    
+
     (updateProfile as jest.Mock).mockRejectedValue(
       new Error("Profile not found")
     );
-  
-   
+
     (supabase.auth.getUser as jest.Mock).mockResolvedValue({
       data: { user: { id: fakeUserId } },
       error: null,
     });
-  
+
     const response = await request(app)
-      .post("/api/profile")
+      .patch("/api/profile")
       .set("Authorization", "Bearer fake-token")
       .send(updates)
       .expect(404);
-   
+
     expect(response.body.error).toBe("Profile not found");
   });
   it("should return 400 if name is invalid (too long)", async () => {
     const invalidUpdate = {
-      name: "A".repeat(51)
+      name: "A".repeat(51),
     };
-  
+
     (supabase.auth.getUser as jest.Mock).mockResolvedValue({
       data: { user: { id: "123..." } },
       error: null,
     });
-  
+
     const response = await request(app)
-      .post("/api/profile")
+      .patch("/api/profile")
       .set("Authorization", "Bearer fake-token")
       .send(invalidUpdate)
       .expect(400);
-  
-    expect(response.body.error).toBe("Invalid request body");
-    // expect(response.body.details).toContain("Name must be at most 50 characters");
+
+    expect(response.body.error).toBe("Invalid name");
+  });
+  it("should return 500 if the server is broken", async () => {
+    const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
+
+
+    const update = {
+      name: "New Name",
+    };
+
+    (updateProfile as jest.Mock).mockRejectedValue(
+      new Error("Failed to update profile")
+    );
+
+
+    (supabase.auth.getUser as jest.Mock).mockResolvedValue({
+      data: { user: { id: fakeUserId } },
+      error: null,
+    });
+
+    const response = await request(app)
+      .patch("/api/profile")
+      .set("Authorization", "Bearer any-fake-token")
+      .send(update)
+      .expect(500);
+
+      expect(response.body.error).toBe("Failed to update profile");
   });
 });
