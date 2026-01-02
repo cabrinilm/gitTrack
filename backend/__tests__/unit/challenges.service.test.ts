@@ -3,7 +3,7 @@ import { getChallenges } from "../../src/services/challenges.service";
 
 
 describe("Challenges GET", () => {
-  it.only("should return all challenges created by an user", async () => {
+  it("should return all challenges created by an user", async () => {
     const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
 
     const listChallenges = [
