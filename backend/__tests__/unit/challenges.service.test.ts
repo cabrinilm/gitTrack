@@ -36,7 +36,7 @@ describe("Challenges GET", () => {
 
     expect(userChallenges).toEqual(listChallenges);
   });
-  it.only("should return an empty array if user does not have created challenges", async () => {
+  it("should return an empty array if user does not have created challenges", async () => {
     const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
 
     const mockSupabase = {
@@ -55,5 +55,25 @@ describe("Challenges GET", () => {
   expect(userChallenges).toEqual([]);
 
    
-  })
+  });
+  it("should throw an error if Supabase return an error", async () => {
+    const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
+
+    const mockSupabase = {
+      from: () => ({
+        select: () => ({
+          eq: (column: string, value: string) => ({
+            data: null,
+            error: { message: "Permission denied" },
+          }),
+        }),
+      }),
+    };
+
+ 
+
+  await expect(
+    getChallenges(mockSupabase as any, fakeUserId)
+  ).rejects.toThrow("Failed to fetch challenges")
+  });
 });
