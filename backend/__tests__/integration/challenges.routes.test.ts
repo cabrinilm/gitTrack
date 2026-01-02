@@ -40,4 +40,24 @@ describe("GET /api/challenges", () => {
     expect(response.body).toEqual(listChallenges);
     expect(getChallenges).toHaveBeenCalledWith(expect.any(Object), fakeUserId);
   });
+  it.only("should return 200 and empty array if user does not have created challenges", async () => {
+    const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
+
+   
+
+    (getChallenges as jest.Mock).mockResolvedValue([]);
+
+    (supabase.auth.getUser as jest.Mock).mockResolvedValue({
+      data: { user: { id: fakeUserId } },
+      error: null,
+    });
+
+    const response = await request(app)
+      .get("/api/challenges")
+      .set("Authorization", "Bearer any-fake-token")
+      .expect(200);
+
+    expect(response.body).toEqual([]);
+    expect(getChallenges).toHaveBeenCalledWith(expect.any(Object), fakeUserId);
+  });
 });
