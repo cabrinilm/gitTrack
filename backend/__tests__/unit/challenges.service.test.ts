@@ -1,5 +1,9 @@
+import type { Challenges } from "../../src/services/challenges.service"
+import { getChallenges } from "../../src/services/challenges.service";
+
+
 describe("Challenges GET", () => {
-  it("should return all challenges created by an user", async () => {
+  it.only("should return all challenges created by an user", async () => {
     const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
 
     const listChallenges = [
@@ -28,7 +32,7 @@ describe("Challenges GET", () => {
         }),
       };
 
-    const userChallenges = await getChallenges(mockSupabase as any, fakeUserId);
+    const userChallenges : Challenges[] = await getChallenges(mockSupabase as any, fakeUserId);
 
     expect(userChallenges).toEqual(listChallenges);
   });
