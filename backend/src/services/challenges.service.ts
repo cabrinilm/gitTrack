@@ -12,7 +12,7 @@ export async function getChallenges(
     .eq("user_id", userId);
     
     if(error){
-        throw new Error(`Failed to fetch challenges: ${error.message}`);
+        throw new Error("Failed to fetch challenges");
     }
 
     return data ?? [];
