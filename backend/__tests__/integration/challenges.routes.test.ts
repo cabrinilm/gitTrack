@@ -40,7 +40,7 @@ describe("GET /api/challenges", () => {
     expect(response.body).toEqual(listChallenges);
     expect(getChallenges).toHaveBeenCalledWith(expect.any(Object), fakeUserId);
   });
-  it.only("should return 200 and empty array if user does not have created challenges", async () => {
+  it("should return 200 and empty array if user does not have created challenges", async () => {
     const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
 
    
@@ -60,4 +60,10 @@ describe("GET /api/challenges", () => {
     expect(response.body).toEqual([]);
     expect(getChallenges).toHaveBeenCalledWith(expect.any(Object), fakeUserId);
   });
+  it("should return 401 if no token is provided", async () => {
+    const response = await request(app).get("/api/challenges").expect(401);
+
+    expect(response.body.error).toEqual("No token provided");
+
+  })
 });
