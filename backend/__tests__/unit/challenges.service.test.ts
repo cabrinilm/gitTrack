@@ -1,6 +1,5 @@
-import type { Challenges } from "../../src/services/challenges.service"
-import { getChallenges } from "../../src/services/challenges.service";
-
+import type { Challenges } from "../../src/services/challenges.service";
+import { getChallenges, createChallenges } from "../../src/services/challenges.service";
 
 describe("Challenges GET", () => {
   it("should return all challenges created by an user", async () => {
@@ -22,17 +21,20 @@ describe("Challenges GET", () => {
     ];
 
     const mockSupabase = {
-        from: () => ({
-          select: () => ({
-            eq: (column: string, value: string) => ({
-              data: value === fakeUserId ? listChallenges : [],
-              error: null,
-            }),
+      from: () => ({
+        select: () => ({
+          eq: (column: string, value: string) => ({
+            data: value === fakeUserId ? listChallenges : [],
+            error: null,
           }),
         }),
-      };
+      }),
+    };
 
-    const userChallenges : Challenges[] = await getChallenges(mockSupabase as any, fakeUserId);
+    const userChallenges: Challenges[] = await getChallenges(
+      mockSupabase as any,
+      fakeUserId
+    );
 
     expect(userChallenges).toEqual(listChallenges);
   });
@@ -50,11 +52,12 @@ describe("Challenges GET", () => {
       }),
     };
 
-  const userChallenges : Challenges[] = await getChallenges(mockSupabase as any, fakeUserId);
+    const userChallenges: Challenges[] = await getChallenges(
+      mockSupabase as any,
+      fakeUserId
+    );
 
-  expect(userChallenges).toEqual([]);
-
-   
+    expect(userChallenges).toEqual([]);
   });
   it("should throw an error if Supabase return an error", async () => {
     const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
@@ -70,50 +73,45 @@ describe("Challenges GET", () => {
       }),
     };
 
- 
-
-  await expect(
-    getChallenges(mockSupabase as any, fakeUserId)
-  ).rejects.toThrow("Failed to fetch challenges")
+    await expect(
+      getChallenges(mockSupabase as any, fakeUserId)
+    ).rejects.toThrow("Failed to fetch challenges");
   });
 });
 
 describe("Challenges POST", () => {
-  it("should return the challenge created by user",  async () => {
-
+  it.only("should return the challenge created by user", async () => {
     const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
 
+    const newChallenge = {
+      name: "Basic goals",
+      description: "I want to learn 3 new activities",
+    };
 
-    const newChallenge  = 
-      {
-     
-        name: "Basic goals",
-        description: "I want to learn 3 new activities",
-    
-      };
-
-
-      const mockSupabase = {
-        from: () => ({
-          insert: (newChallenge: Partial<Challenges>) => ({
-            select: () => ({
-              single: async () => ({
-                data: {
-                  ...newChallenge,
-                  id: "fake-id-123",
-                  created_at: new Date().toISOString(),
-                  updated_at: new Date().toISOString(),
-                  user_id: fakeUserId,
-                },
-                error: null,
-              }),
+    const mockSupabase = {
+      from: () => ({
+        insert: (newChallenge: Partial<Challenges>) => ({
+          select: () => ({
+            single: async () => ({
+              data: {
+                ...newChallenge,
+                id: "fake-id-123",
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+                user_id: fakeUserId,
+              },
+              error: null,
             }),
           }),
         }),
-      };
+      }),
+    };
 
-      const userChallenges : Challenges[] = await createChallenges(mockSupabase as any, fakeUserId)
+    const userChallenges: Challenges[] = await createChallenges(
+      mockSupabase as any,
+      fakeUserId
+    );
 
-      expect(userChallenges).toEqual(newChallenge);
-  })
-})
+    expect(userChallenges).toEqual(newChallenge);
+  });
+});
