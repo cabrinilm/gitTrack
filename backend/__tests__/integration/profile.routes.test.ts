@@ -142,7 +142,7 @@ describe("PATCH /api/profile", () => {
 
     expect(response.body.error).toBe("Invalid name");
   });
-  it("should return 500 if the server is broken", async () => {
+  it("should return 500 if an unexpected server error occurs", async () => {
     const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
 
 

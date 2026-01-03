@@ -77,3 +77,43 @@ describe("Challenges GET", () => {
   ).rejects.toThrow("Failed to fetch challenges")
   });
 });
+
+describe("Challenges POST", () => {
+  it("should return the challenge created by user",  async () => {
+
+    const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
+
+
+    const newChallenge  = 
+      {
+     
+        name: "Basic goals",
+        description: "I want to learn 3 new activities",
+    
+      };
+
+
+      const mockSupabase = {
+        from: () => ({
+          insert: (newChallenge: Partial<Challenges>) => ({
+            select: () => ({
+              single: async () => ({
+                data: {
+                  ...newChallenge,
+                  id: "fake-id-123",
+                  created_at: new Date().toISOString(),
+                  updated_at: new Date().toISOString(),
+                  user_id: fakeUserId,
+                },
+                error: null,
+              }),
+            }),
+          }),
+        }),
+      };
+
+      const userChallenges : Challenges[] = await createChallenges(mockSupabase as any, fakeUserId)
+
+      expect(userChallenges).toEqual(newChallenge);
+  })
+})

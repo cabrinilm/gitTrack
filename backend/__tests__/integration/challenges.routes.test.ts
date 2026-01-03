@@ -65,5 +65,26 @@ describe("GET /api/challenges", () => {
 
     expect(response.body.error).toEqual("No token provided");
 
+  });
+  it("should return 500 if an unexpected server error occurs", async () => {
+    const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
+
+     (getChallenges as jest.Mock).mockRejectedValue(
+      new Error("Failed to fetch challenges")
+     );
+
+     (supabase.auth.getUser as jest.Mock).mockResolvedValue({
+      data: { user: { id: fakeUserId } },
+      error: null,
+    });
+
+    const response = await request(app)
+    .get("/api/challenges")
+    .set("Authorization", "Bearer any-fake-token")
+    .expect(500);
+
+    expect(response.body.error).toBe("Failed to fetch challenges");
+
+
   })
 });
