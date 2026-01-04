@@ -1,5 +1,5 @@
 import type { Challenges } from "../../src/services/challenges.service";
-import { getChallenges, createChallenges } from "../../src/services/challenges.service";
+import { getChallenges, createChallenge} from "../../src/services/challenges.service";
 
 describe("Challenges GET", () => {
   it("should return all challenges created by an user", async () => {
@@ -80,13 +80,21 @@ describe("Challenges GET", () => {
 });
 
 describe("Challenges POST", () => {
-  it.only("should return the challenge created by user", async () => {
+  it("should return the challenge created by user", async () => {
     const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
 
     const newChallenge = {
       name: "Basic goals",
       description: "I want to learn 3 new activities",
     };
+
+    const challengeCreated = {
+      ...newChallenge,
+      id: "fake-id-123",
+      created_at: "2026-01-04T15:57:53.336Z",
+      updated_at: "2026-01-04T15:57:53.337Z",
+      user_id: fakeUserId,
+    }
 
     const mockSupabase = {
       from: () => ({
@@ -96,8 +104,8 @@ describe("Challenges POST", () => {
               data: {
                 ...newChallenge,
                 id: "fake-id-123",
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
+                created_at: "2026-01-04T15:57:53.336Z",
+                updated_at: "2026-01-04T15:57:53.337Z",
                 user_id: fakeUserId,
               },
               error: null,
@@ -107,11 +115,12 @@ describe("Challenges POST", () => {
       }),
     };
 
-    const userChallenges: Challenges[] = await createChallenges(
+    const userChallenges: Challenges = await createChallenge(
       mockSupabase as any,
-      fakeUserId
+      fakeUserId, newChallenge
     );
-
-    expect(userChallenges).toEqual(newChallenge);
+ 
+  
+    expect(userChallenges).toEqual(challengeCreated);
   });
 });
