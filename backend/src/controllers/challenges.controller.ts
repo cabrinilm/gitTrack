@@ -1,5 +1,7 @@
 import type { Request, Response } from "express";
 import { createChallenge, getChallenges } from "../services/challenges.service";
+import { postChallengeSchema } from "../schemas/challenge.scheme";
+import { z } from "zod";
 
 export const getMyChallenges = async (
   req: Request,
@@ -27,7 +29,6 @@ export const getMyChallenges = async (
   }
 };
 
-
 export const createMyChallenges = async (
   req: Request,
   res: Response
@@ -35,8 +36,7 @@ export const createMyChallenges = async (
   try {
     const supabase = req.supabase;
     const userId = req.user?.id;
-    const {name, description}= req.body;
-
+    
 
     if (!supabase) {
       res.status(500).json({ error: "Supabase client not found in request" });
@@ -47,20 +47,25 @@ export const createMyChallenges = async (
       res.status(401).json({ error: "Unauthorized: No user ID found" });
       return;
     }
- 
-   
-    if (!name) {
-      res.status(400).json({ error: "Name is required" });
+
+    const parsed = postChallengeSchema.safeParse(req.body);
+
+    if (!parsed.success) {
+      res.status(400).json({
+        error: "Invalid request body",
+        details: z.treeifyError(parsed.error),
+      });
       return;
     }
+    const normalizedData = {
+      ...parsed.data,
+      description: parsed.data.description ?? null,
+    };
 
-    const newChallenge = await createChallenge(supabase, userId, {name, description})
+    const newChallenge = await createChallenge(supabase, userId, normalizedData);
 
-    res.status(201).json(newChallenge)
-   
-  } catch (error){
-    res.status(500).json({error:"Failed to create new challenge"})
-  };
-
-  
-}
+    res.status(201).json(newChallenge);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to create new challenge" });
+  }
+};
