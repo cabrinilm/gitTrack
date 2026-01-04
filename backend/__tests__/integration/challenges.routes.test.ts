@@ -1,6 +1,9 @@
 import request from "supertest";
 import app from "../../src/server";
-import { getChallenges, createChallenge } from "../../src/services/challenges.service";
+import {
+  getChallenges,
+  createChallenge,
+} from "../../src/services/challenges.service";
 import { supabase } from "../../src/services/supabaseClient";
 
 jest.mock("../../src/services/challenges.service");
@@ -43,8 +46,6 @@ describe("GET /api/challenges", () => {
   it("should return 200 and empty array if user does not have created challenges", async () => {
     const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
 
-   
-
     (getChallenges as jest.Mock).mockResolvedValue([]);
 
     (supabase.auth.getUser as jest.Mock).mockResolvedValue({
@@ -64,40 +65,36 @@ describe("GET /api/challenges", () => {
     const response = await request(app).get("/api/challenges").expect(401);
 
     expect(response.body.error).toEqual("No token provided");
-
   });
   it("should return 500 if an unexpected server error occurs", async () => {
     const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
 
-     (getChallenges as jest.Mock).mockRejectedValue(
+    (getChallenges as jest.Mock).mockRejectedValue(
       new Error("Failed to fetch challenges")
-     );
+    );
 
-     (supabase.auth.getUser as jest.Mock).mockResolvedValue({
+    (supabase.auth.getUser as jest.Mock).mockResolvedValue({
       data: { user: { id: fakeUserId } },
       error: null,
     });
 
     const response = await request(app)
-    .get("/api/challenges")
-    .set("Authorization", "Bearer any-fake-token")
-    .expect(500);
+      .get("/api/challenges")
+      .set("Authorization", "Bearer any-fake-token")
+      .expect(500);
 
     expect(response.body.error).toBe("Failed to fetch challenges");
-
-
-  })
+  });
 });
 
 describe("POST /api/challenges", () => {
-  it.only("should return 200 and the challenge created",  async () => {
+  it.only("should return 200 and the challenge created", async () => {
     const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
 
     const newChallenge = {
       name: "Basic goals",
       description: "I want to learn 3 new activities",
     };
-
 
     const challengeCreated = {
       ...newChallenge,
@@ -107,23 +104,21 @@ describe("POST /api/challenges", () => {
       user_id: fakeUserId,
     };
 
-   (createChallenge as jest.Mock).mockResolvedValue(challengeCreated)
+    console.log(typeof createChallenge);
+
+    (createChallenge as jest.Mock).mockResolvedValue(challengeCreated);
 
     (supabase.auth.getUser as jest.Mock).mockResolvedValue({
       data: { user: { id: fakeUserId } },
       error: null,
     });
 
-
     const response = await request(app)
-    .post("/api/challenges")
-    .set("Authorization", "Bearer any-fake-token")
-    .send(newChallenge)
-    .expect(200)
+      .post("/api/challenges")
+      .set("Authorization", "Bearer any-fake-token")
+      .send(newChallenge)
+      .expect(201);
 
-
-    expect(response).toEqual(challengeCreated)
-
-
-  })
-})
+    expect(response.body).toEqual(challengeCreated);
+  });
+});
