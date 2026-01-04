@@ -35,6 +35,8 @@ describe("GET /api/challenges", () => {
       error: null,
     });
 
+
+
     const response = await request(app)
       .get("/api/challenges")
       .set("Authorization", "Bearer any-fake-token")
@@ -88,7 +90,7 @@ describe("GET /api/challenges", () => {
 });
 
 describe("POST /api/challenges", () => {
-  it.only("should return 200 and the challenge created", async () => {
+  it("should return 201 and the challenge created", async () => {
     const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
 
     const newChallenge = {
@@ -99,15 +101,15 @@ describe("POST /api/challenges", () => {
     const challengeCreated = {
       ...newChallenge,
       id: "fake-id-123",
-      created_at: "2026-01-04T15:57:53.336Z",
-      updated_at: "2026-01-04T15:57:53.337Z",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
       user_id: fakeUserId,
     };
 
     console.log(typeof createChallenge);
 
     (createChallenge as jest.Mock).mockResolvedValue(challengeCreated);
-
+   
     (supabase.auth.getUser as jest.Mock).mockResolvedValue({
       data: { user: { id: fakeUserId } },
       error: null,
