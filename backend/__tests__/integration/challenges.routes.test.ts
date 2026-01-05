@@ -126,6 +126,7 @@ describe("POST /api/challenges", () => {
 
     const newChallenge = {
       name: "Basic goals",
+      description:"",
     };
 
     const challengeCreated = {
@@ -182,7 +183,7 @@ describe("POST /api/challenges", () => {
       "Name too long",
     ]);
   });
-  it.only("should return 400 when challenge name is an empty string", async () => {
+  it("should return 400 when challenge name is an empty string", async () => {
     const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
 
     const newChallenge = {
@@ -204,6 +205,30 @@ describe("POST /api/challenges", () => {
     expect(response.body.error).toEqual("Invalid request body");
     expect(response.body.details?.properties?.name?.errors).toEqual([
       "Name cannot be empty",
+    ]);
+  });
+  it("should return 400 when challenge description exceeds maximum length", async () => {
+    const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
+
+    const newChallenge = {
+      name: "New Challenge",
+      description: "I want to learn 3 new activities,I want to learn 3 new activities,I want to learn 3 new activities",
+    };
+
+    (supabase.auth.getUser as jest.Mock).mockResolvedValue({
+      data: { user: { id: fakeUserId } },
+      error: null,
+    });
+
+    const response = await request(app)
+      .post("/api/challenges")
+      .set("Authorization", "Bearer any-fake-token")
+      .send(newChallenge)
+      .expect(400);
+
+    expect(response.body.error).toEqual("Invalid request body");
+    expect(response.body.details?.properties?.description?.errors).toEqual([
+      "Description too long",
     ]);
   });
 });
