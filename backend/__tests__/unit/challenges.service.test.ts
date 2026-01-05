@@ -2,7 +2,7 @@ import type { Challenges } from "../../src/services/challenges.service";
 import { getChallenges, createChallenge} from "../../src/services/challenges.service";
 
 describe("Challenges GET", () => {
-  it("should return all challenges created by an user", async () => {
+  it("should return all challenges created by user", async () => {
     const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
 
     const listChallenges = [
@@ -123,4 +123,33 @@ describe("Challenges POST", () => {
   
     expect(userChallenges).toEqual(challengeCreated);
   });
+  it.only("should throw an error if Supabase return an error", async () => {
+    const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
+
+    const newChallenge = {
+      name: "Basic goals",
+      description: "I want to learn 3 new activities",
+    };
+
+  
+    const mockSupabase = {
+      from: () => ({
+        insert: (newChallenge: Partial<Challenges>) => ({
+          select: () => ({
+            single: async () => ({
+              data: 
+               null
+              ,
+              error: { message: "Failed to create new challenge"},
+            }),
+          }),
+        }),
+      }),
+    };
+
+    await expect(
+      createChallenge(mockSupabase as any, fakeUserId, newChallenge)
+    ).rejects.toThrow("Failed to create new challenge")
+
+  })
 });
