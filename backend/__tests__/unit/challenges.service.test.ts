@@ -123,7 +123,7 @@ describe("Challenges POST", () => {
   
     expect(userChallenges).toEqual(challengeCreated);
   });
-  it.only("should throw an error if Supabase return an error", async () => {
+  it("should throw an error if Supabase returns an error", async () => {
     const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
 
     const newChallenge = {
@@ -140,7 +140,7 @@ describe("Challenges POST", () => {
               data: 
                null
               ,
-              error: { message: "Failed to create new challenge"},
+              error: { message: "Permission denied"},
             }),
           }),
         }),
@@ -151,5 +151,5 @@ describe("Challenges POST", () => {
       createChallenge(mockSupabase as any, fakeUserId, newChallenge)
     ).rejects.toThrow("Failed to create new challenge")
 
-  })
+  });
 });
