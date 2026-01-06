@@ -104,7 +104,7 @@ describe("POST /api/challenges", () => {
       user_id: fakeUserId,
     };
 
-    console.log(typeof createChallenge);
+    
 
     (createChallenge as jest.Mock).mockResolvedValue(challengeCreated);
 
@@ -258,3 +258,4 @@ describe("POST /api/challenges", () => {
     expect(response.body.error).toBe("Failed to create new challenge");
   });
 });
+

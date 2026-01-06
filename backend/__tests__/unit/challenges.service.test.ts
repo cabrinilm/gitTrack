@@ -1,5 +1,8 @@
 import type { Challenges } from "../../src/services/challenges.service";
-import { getChallenges, createChallenge} from "../../src/services/challenges.service";
+import {
+  getChallenges,
+  createChallenge,
+} from "../../src/services/challenges.service";
 
 describe("Challenges GET", () => {
   it("should return all challenges created by user", async () => {
@@ -94,7 +97,7 @@ describe("Challenges POST", () => {
       created_at: "2026-01-04T15:57:53.336Z",
       updated_at: "2026-01-04T15:57:53.337Z",
       user_id: fakeUserId,
-    }
+    };
 
     const mockSupabase = {
       from: () => ({
@@ -117,10 +120,10 @@ describe("Challenges POST", () => {
 
     const userChallenges: Challenges = await createChallenge(
       mockSupabase as any,
-      fakeUserId, newChallenge
+      fakeUserId,
+      newChallenge
     );
- 
-  
+
     expect(userChallenges).toEqual(challengeCreated);
   });
   it("should throw an error if Supabase returns an error", async () => {
@@ -131,16 +134,13 @@ describe("Challenges POST", () => {
       description: "I want to learn 3 new activities",
     };
 
-  
     const mockSupabase = {
       from: () => ({
         insert: (newChallenge: Partial<Challenges>) => ({
           select: () => ({
             single: async () => ({
-              data: 
-               null
-              ,
-              error: { message: "Permission denied"},
+              data: null,
+              error: { message: "Permission denied" },
             }),
           }),
         }),
@@ -149,7 +149,65 @@ describe("Challenges POST", () => {
 
     await expect(
       createChallenge(mockSupabase as any, fakeUserId, newChallenge)
-    ).rejects.toThrow("Failed to create new challenge")
+    ).rejects.toThrow("Failed to create new challenge");
+  });
+});
 
+describe("Challenges PATCH", () => {
+  it.only("should update challenge and return updated data", async () => {
+
+    const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
+const fakeChallengeId = "fake-challenge-id-123";
+
+const updates = {
+  name: "Novo nome atualizado",
+  description: "Nova descrição",
+};
+
+const expectedUpdatedChallenge = {
+  id: fakeChallengeId,
+  user_id: fakeUserId,
+  name: "Novo nome atualizado",
+  description: "Nova descrição",
+  created_at: "2026-01-04T15:57:53.336Z",
+  updated_at: new Date().toISOString(),
+};
+
+const mockSupabase = {
+  from: () => ({
+    update: (receivedUpdates: Partial<Challenges>) => ({
+      // Primeiro .eq() (ex: .eq("id", fakeChallengeId))
+      eq: (column1: string, value1: string) => ({
+        // Segundo .eq() (ex: .eq("user_id", fakeUserId))
+        eq: (column2: string, value2: string) => ({
+          select: () => ({
+            single: async () => ({
+              data: {
+                ...receivedUpdates,
+                id: fakeChallengeId,
+                user_id: fakeUserId,
+                created_at: "2026-01-04T15:57:53.336Z",
+                updated_at: new Date().toISOString(),
+              },
+              error: null,
+            }),
+          }),
+        }),
+    
+        select: () => ({
+          single: async () => ({
+            data: null,
+            error: { message: "Challenge not found" },
+          }),
+        }),
+      }),
+    }),
+  }),
+};
+   
+
+    const updated = await updateChallenge(mockSupabase as any, fakeUserId, fakeChallengeId, updates);
+
+    expect(updated).toEqual(expectedUpdatedChallenge);
   });
 });
