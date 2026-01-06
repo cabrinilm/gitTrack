@@ -231,4 +231,30 @@ describe("POST /api/challenges", () => {
       "Description too long",
     ]);
   });
+  it("should return 500 if an unexpected server error occurs", async () => {
+    const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
+
+
+    const newChallenge = {
+      name: "New Challenge",
+      description: "I want to learn 3 new activities.",
+    };
+
+    (createChallenge as jest.Mock).mockRejectedValue(
+      new Error("Failed to create new challenge")
+    );
+
+    (supabase.auth.getUser as jest.Mock).mockResolvedValue({
+      data: { user: { id: fakeUserId } },
+      error: null,
+    });
+
+    const response = await request(app)
+      .post("/api/challenges")
+      .set("Authorization", "Bearer any-fake-token")
+      .send(newChallenge)
+      .expect(500);
+
+    expect(response.body.error).toBe("Failed to create new challenge");
+  });
 });
