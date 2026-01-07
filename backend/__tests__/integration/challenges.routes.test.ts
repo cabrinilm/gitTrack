@@ -259,11 +259,11 @@ describe("POST /api/challenges", () => {
 });
 
 describe("PATCH /api/challenges/:id", () => {
-  it.only("should return 200 and the updated challenge", async () => {
+  it("returns 200 and the updated challenge when update is successful", async () => {
     const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
-    const fakeChallengeId = 2;
+    const fakeChallengeId = 234;
 
-    const updates = {
+    const update = {
       name: "Name updated",
       description: "New description",
     };
@@ -274,11 +274,10 @@ describe("PATCH /api/challenges/:id", () => {
       name: "Name updated",
       description: "New description",
       created_at: "2026-01-04T15:57:53.336Z",
-      updated_at: new Date().toISOString(),
+      updated_at: "2026-01-04T15:57:53.399Z",
     };
 
     (updateChallenge as jest.Mock).mockResolvedValue(expectedUpdatedChallenge);
-
 
 
     (supabase.auth.getUser as jest.Mock).mockResolvedValue({
@@ -289,14 +288,59 @@ describe("PATCH /api/challenges/:id", () => {
     const response = await request(app)
     .patch(`/api/challenges/${fakeChallengeId}`)
     .set("Authorization", "Bearer any-fake-token")
-    .send(updates)
+    .send(update)
     .expect(200)
 
+    
+
+    expect(response.body).toEqual(expectedUpdatedChallenge);
+    expect(updateChallenge).toHaveBeenCalledWith(
+      expect.anything(),
+      fakeUserId,
+      fakeChallengeId,
+      update
+    );
+
+  });
+  it("returns 200 and the updated challenge when update without description is successful", async () => {
+    const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
+    const fakeChallengeId = 234;
+
+    const update = {
+      name: "Name updated",
+    };
+
+    const expectedUpdatedChallenge = {
+      id: fakeChallengeId,
+      user_id: fakeUserId,
+      name: "Name updated",
+      created_at: "2026-01-04T15:57:53.336Z",
+      updated_at: "2026-01-04T15:57:53.399Z",
+    };
+
+    (updateChallenge as jest.Mock).mockResolvedValue(expectedUpdatedChallenge);
 
 
-    expect(response).toEqual(expectedUpdatedChallenge);
+    (supabase.auth.getUser as jest.Mock).mockResolvedValue({
+      data: { user: { id: fakeUserId } },
+      error: null,
+    });
 
+    const response = await request(app)
+    .patch(`/api/challenges/${fakeChallengeId}`)
+    .set("Authorization", "Bearer any-fake-token")
+    .send(update)
+    .expect(200)
 
+    
+
+    expect(response.body).toEqual(expectedUpdatedChallenge);
+    expect(updateChallenge).toHaveBeenCalledWith(
+      expect.anything(),
+      fakeUserId,
+      fakeChallengeId,
+      update
+    );
 
   });
 });

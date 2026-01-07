@@ -155,7 +155,7 @@ describe("Challenges POST", () => {
 });
 
 describe("Challenges PATCH", () => {
-  it.only("should update challenge and return updated data", async () => {
+  it("should update challenge and return updated data", async () => {
     const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
     const fakeChallengeId = 2;
 
@@ -211,5 +211,34 @@ describe("Challenges PATCH", () => {
     );
 
     expect(updated).toEqual(expectedUpdatedChallenge);
+  });
+  it("should throw an error if Supabase returns an error", async () => {
+    const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
+    const fakeChallengeId = 2;
+    const updates = {
+      name: "Name updated",
+      description: "New description",
+    };
+  
+    const mockSupabase = {
+      from: () => ({
+        update: () => ({
+          eq: () => ({
+            eq: () => ({
+              select: () => ({
+                single: async () => ({
+                  data: null,
+                  error: { message: "Failed to update challenge" },
+                }),
+              }),
+            }),
+          }),
+        }),
+      }),
+    };
+  
+    await expect(
+      updateChallenge(mockSupabase as any, fakeUserId, fakeChallengeId, updates)
+    ).rejects.toThrow("Failed to update challenge");
   });
 });

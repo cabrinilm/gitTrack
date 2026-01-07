@@ -86,6 +86,10 @@ export const updateMyChallenge = async (
     const userId = req.user?.id;
     const challengeId = Number(req.params.challengeId);
     const update = req.body;
+
+    console.log(userId)
+    console.log(challengeId)
+
     if (!supabase) {
       res.status(500).json({ error: "Supabase client not found in request" });
       return;

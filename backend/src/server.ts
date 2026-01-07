@@ -21,7 +21,7 @@ app.patch("/api/profile", updateMyProfile);
 
 app.get("/api/challenges", getMyChallenges);
 app.post("/api/challenges", createMyChallenge);
-app.patch("/api/challenges/challengeId", updateMyChallenge)
+app.patch("/api/challenges/:challengeId", updateMyChallenge)
 
 export default app; 
 
