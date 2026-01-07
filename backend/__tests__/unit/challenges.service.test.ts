@@ -3,6 +3,7 @@ import {
   getChallenges,
   createChallenge,
   updateChallenge,
+  deleteChallenge
 } from "../../src/services/challenges.service";
 
 describe("Challenges GET", () => {
@@ -219,7 +220,7 @@ describe("Challenges PATCH", () => {
       name: "Name updated",
       description: "New description",
     };
-  
+
     const mockSupabase = {
       from: () => ({
         update: () => ({
@@ -236,9 +237,40 @@ describe("Challenges PATCH", () => {
         }),
       }),
     };
-  
+
     await expect(
       updateChallenge(mockSupabase as any, fakeUserId, fakeChallengeId, updates)
     ).rejects.toThrow("Failed to update challenge");
+  });
+});
+
+describe("Challenges DELETE", () => {
+  it.only("should return the success message for challenge deleted", async () => {
+    const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
+    const fakeChallengeId = 2;
+
+    const mockSupabase = {
+      from: () => ({
+        delete: () => ({
+          eq: (column1: string, value1: string) => ({
+            eq: (column2: number, value2: number) => ({
+              select: async () => ({
+                data: { message: "Deleted successfully" },
+                error: null,
+              }),
+            }),
+          }),
+        }),
+      }),
+    };
+
+    const deletedChallenge = await deleteChallenge(
+      mockSupabase as any,
+      fakeUserId,
+      fakeChallengeId
+    );
+
+    expect(deletedChallenge).toEqual("Deleted successfully")
+
   });
 });
