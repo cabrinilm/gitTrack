@@ -85,10 +85,22 @@ export const updateMyChallenge = async (
     const supabase = req.supabase;
     const userId = req.user?.id;
     const challengeId = Number(req.params.challengeId);
-    const update = req.body;
+   
+    const parsed = postChallengeSchema.safeParse(req.body);
+    
+    if (!parsed.success) {
+      res.status(400).json({
+        error: "Invalid request body",
+        details: z.treeifyError(parsed.error),
+      });
+      return;
+    }
 
-    console.log(userId)
-    console.log(challengeId)
+    const normalizedData = {
+      ...parsed.data,
+      description: parsed.data.description ?? null,
+    };
+  
 
     if (!supabase) {
       res.status(500).json({ error: "Supabase client not found in request" });
@@ -105,16 +117,13 @@ export const updateMyChallenge = async (
       return;
     }
 
-    if (Object.keys(update).length === 0) {
-      res.status(400).json({ error: "No data to update" });
-      return;
-    }
+ 
 
     const challengeUpdated = await updateChallenge(
       supabase,
       userId,
       challengeId,
-      update
+      normalizedData
     );
 
     res.status(200).json(challengeUpdated);

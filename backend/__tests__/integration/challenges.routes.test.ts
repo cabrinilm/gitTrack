@@ -136,8 +136,6 @@ describe("POST /api/challenges", () => {
       user_id: fakeUserId,
     };
 
- 
-
     (createChallenge as jest.Mock).mockResolvedValue(challengeCreated);
 
     (supabase.auth.getUser as jest.Mock).mockResolvedValue({
@@ -279,19 +277,16 @@ describe("PATCH /api/challenges/:id", () => {
 
     (updateChallenge as jest.Mock).mockResolvedValue(expectedUpdatedChallenge);
 
-
     (supabase.auth.getUser as jest.Mock).mockResolvedValue({
       data: { user: { id: fakeUserId } },
       error: null,
     });
 
     const response = await request(app)
-    .patch(`/api/challenges/${fakeChallengeId}`)
-    .set("Authorization", "Bearer any-fake-token")
-    .send(update)
-    .expect(200)
-
-    
+      .patch(`/api/challenges/${fakeChallengeId}`)
+      .set("Authorization", "Bearer any-fake-token")
+      .send(update)
+      .expect(200);
 
     expect(response.body).toEqual(expectedUpdatedChallenge);
     expect(updateChallenge).toHaveBeenCalledWith(
@@ -300,7 +295,6 @@ describe("PATCH /api/challenges/:id", () => {
       fakeChallengeId,
       update
     );
-
   });
   it("returns 200 and the updated challenge when update without description is successful", async () => {
     const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
@@ -308,6 +302,7 @@ describe("PATCH /api/challenges/:id", () => {
 
     const update = {
       name: "Name updated",
+      description: "",
     };
 
     const expectedUpdatedChallenge = {
@@ -320,19 +315,16 @@ describe("PATCH /api/challenges/:id", () => {
 
     (updateChallenge as jest.Mock).mockResolvedValue(expectedUpdatedChallenge);
 
-
     (supabase.auth.getUser as jest.Mock).mockResolvedValue({
       data: { user: { id: fakeUserId } },
       error: null,
     });
 
     const response = await request(app)
-    .patch(`/api/challenges/${fakeChallengeId}`)
-    .set("Authorization", "Bearer any-fake-token")
-    .send(update)
-    .expect(200)
-
-    
+      .patch(`/api/challenges/${fakeChallengeId}`)
+      .set("Authorization", "Bearer any-fake-token")
+      .send(update)
+      .expect(200);
 
     expect(response.body).toEqual(expectedUpdatedChallenge);
     expect(updateChallenge).toHaveBeenCalledWith(
@@ -341,6 +333,121 @@ describe("PATCH /api/challenges/:id", () => {
       fakeChallengeId,
       update
     );
+  });
+  it("return 401 if no token is provided", async () => {
+    const fakeChallengeId = 234;
 
+    const update = {
+      name: "Name updated",
+    };
+    const response = await request(app)
+      .patch(`/api/challenges/${fakeChallengeId}`)
+      .send(update)
+      .expect(401);
+
+    expect(response.body.error).toEqual("No token provided");
+  });
+  it("return 400 when challenge name exceeds maximum length", async () => {
+    const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
+    const fakeChallengeId = 234;
+
+    const update = {
+      name: "Basic goals,Basic goals,Basic goals",
+      description: "I want to learn 3 new activities",
+    };
+
+    (supabase.auth.getUser as jest.Mock).mockResolvedValue({
+      data: { user: { id: fakeUserId } },
+      error: null,
+    });
+
+    const response = await request(app)
+      .patch(`/api/challenges/${fakeChallengeId}`)
+      .set("Authorization", "Bearer any-fake-token")
+      .send(update)
+      .expect(400);
+
+    expect(response.body.error).toEqual("Invalid request body");
+    expect(response.body.details?.properties?.name?.errors).toEqual([
+      "Name too long",
+    ]);
+  });
+  it("return 400 when challenge name is an empty string", async () => {
+    const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
+    const fakeChallengeId = 234;
+
+    const update = {
+      name: "",
+      description: "I want to learn 3 new activities",
+    };
+
+    (supabase.auth.getUser as jest.Mock).mockResolvedValue({
+      data: { user: { id: fakeUserId } },
+      error: null,
+    });
+
+    const response = await request(app)
+      .patch(`/api/challenges/${fakeChallengeId}`)
+      .set("Authorization", "Bearer any-fake-token")
+      .send(update)
+      .expect(400);
+
+    expect(response.body.error).toEqual("Invalid request body");
+    expect(response.body.details?.properties?.name?.errors).toEqual([
+      "Name cannot be empty",
+    ]);
+  });
+  it("return 400 when challenge description exceeds maximum length", async () => {
+    const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
+    const fakeChallengeId = 234;
+
+    const update = {
+      name: "New Challenge",
+      description:
+        "I want to learn 3 new activities,I want to learn 3 new activities,I want to learn 3 new activities",
+    };
+
+    (supabase.auth.getUser as jest.Mock).mockResolvedValue({
+      data: { user: { id: fakeUserId } },
+      error: null,
+    });
+
+    const response = await request(app)
+      .patch(`/api/challenges/${fakeChallengeId}`)
+      .set("Authorization", "Bearer any-fake-token")
+      .send(update)
+      .expect(400);
+
+      expect(response.body.error).toEqual("Invalid request body");
+      expect(response.body.details?.properties?.description?.errors).toEqual([
+        "Description too long",
+      ]);
+  });
+  it("return 500 when if an unexpected server error occurs", async () => {
+    const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
+    const fakeChallengeId = 234;
+
+    const update = {
+      name: "New Challenge",
+      description:"Activities"
+    };
+
+
+    (updateChallenge as jest.Mock).mockRejectedValue(
+      new Error("Failed to update new challenge")
+    );
+
+    (supabase.auth.getUser as jest.Mock).mockResolvedValue({
+      data: { user: { id: fakeUserId } },
+      error: null,
+    });
+
+    const response = await request(app)
+      .patch(`/api/challenges/${fakeChallengeId}`)
+      .set("Authorization", "Bearer any-fake-token")
+      .send(update)
+      .expect(500);
+
+      expect(response.body.error).toBe("Failed to update challenge");
   });
 });
