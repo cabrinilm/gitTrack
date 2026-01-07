@@ -3,7 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { getMyProfile, updateMyProfile } from './controllers/profile.controller';
 import { authMiddleware } from './middleware/auth';
-import { createMyChallenges, getMyChallenges } from "./controllers/challenges.controller";
+import { createMyChallenge, getMyChallenges, updateMyChallenge } from "./controllers/challenges.controller";
 
 
 dotenv.config();
@@ -20,8 +20,8 @@ app.patch("/api/profile", updateMyProfile);
 
 
 app.get("/api/challenges", getMyChallenges);
-app.post("/api/challenges", createMyChallenges);
-
+app.post("/api/challenges", createMyChallenge);
+app.patch("/api/challenges/challengeId", updateMyChallenge)
 
 export default app; 
 
