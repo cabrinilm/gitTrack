@@ -3,6 +3,7 @@ import app from "../../src/server";
 import {
   getChallenges,
   createChallenge,
+  updateChallenge,
 } from "../../src/services/challenges.service";
 import { supabase } from "../../src/services/supabaseClient";
 
@@ -104,8 +105,6 @@ describe("POST /api/challenges", () => {
       user_id: fakeUserId,
     };
 
-    
-
     (createChallenge as jest.Mock).mockResolvedValue(challengeCreated);
 
     (supabase.auth.getUser as jest.Mock).mockResolvedValue({
@@ -126,7 +125,7 @@ describe("POST /api/challenges", () => {
 
     const newChallenge = {
       name: "Basic goals",
-      description:"",
+      description: "",
     };
 
     const challengeCreated = {
@@ -137,7 +136,7 @@ describe("POST /api/challenges", () => {
       user_id: fakeUserId,
     };
 
-    console.log(typeof createChallenge);
+ 
 
     (createChallenge as jest.Mock).mockResolvedValue(challengeCreated);
 
@@ -212,7 +211,8 @@ describe("POST /api/challenges", () => {
 
     const newChallenge = {
       name: "New Challenge",
-      description: "I want to learn 3 new activities,I want to learn 3 new activities,I want to learn 3 new activities",
+      description:
+        "I want to learn 3 new activities,I want to learn 3 new activities,I want to learn 3 new activities",
     };
 
     (supabase.auth.getUser as jest.Mock).mockResolvedValue({
@@ -233,7 +233,6 @@ describe("POST /api/challenges", () => {
   });
   it("should return 500 if an unexpected server error occurs", async () => {
     const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
-
 
     const newChallenge = {
       name: "New Challenge",
@@ -259,3 +258,45 @@ describe("POST /api/challenges", () => {
   });
 });
 
+describe("PATCH /api/challenges/:id", () => {
+  it.only("should return 200 and the updated challenge", async () => {
+    const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
+    const fakeChallengeId = 2;
+
+    const updates = {
+      name: "Name updated",
+      description: "New description",
+    };
+
+    const expectedUpdatedChallenge = {
+      id: fakeChallengeId,
+      user_id: fakeUserId,
+      name: "Name updated",
+      description: "New description",
+      created_at: "2026-01-04T15:57:53.336Z",
+      updated_at: new Date().toISOString(),
+    };
+
+    (updateChallenge as jest.Mock).mockResolvedValue(expectedUpdatedChallenge);
+
+
+
+    (supabase.auth.getUser as jest.Mock).mockResolvedValue({
+      data: { user: { id: fakeUserId } },
+      error: null,
+    });
+
+    const response = await request(app)
+    .patch(`/api/challenges/${fakeChallengeId}`)
+    .set("Authorization", "Bearer any-fake-token")
+    .send(updates)
+    .expect(200)
+
+
+
+    expect(response).toEqual(expectedUpdatedChallenge);
+
+
+
+  });
+});

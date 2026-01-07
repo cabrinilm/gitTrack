@@ -160,15 +160,15 @@ describe("Challenges PATCH", () => {
     const fakeChallengeId = 2;
 
     const updates = {
-      name: "Novo nome atualizado",
-      description: "Nova descrição",
+      name: "Name updated",
+      description: "New description",
     };
 
     const expectedUpdatedChallenge = {
       id: fakeChallengeId,
       user_id: fakeUserId,
-      name: "Novo nome atualizado",
-      description: "Nova descrição",
+      name: "Name updated",
+      description: "New description",
       created_at: "2026-01-04T15:57:53.336Z",
       updated_at: new Date().toISOString(),
     };
