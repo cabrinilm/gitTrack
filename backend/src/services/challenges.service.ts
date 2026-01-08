@@ -59,23 +59,27 @@ export async function updateChallenge(
   return data;
 }
 
-
 export async function deleteChallenge(
   supabase: SupabaseClient<Database>,
   userId: string,
-  challengeId: number,
-): Promise<string>{
-  const {data, error} = await supabase
-  .from("challenges")
-  .delete()
-  .eq("id", challengeId)
-  .eq("user_id", userId)
-  .select();
+  challengeId: number
+): Promise<Challenges> {
+  const { data, error } = await supabase
+    .from("challenges")
+    .delete()
+    .eq("id", challengeId)
+    .eq("user_id", userId)
+    .select()
+    .single();
 
-  if(error){
-    throw new Error("Failed to delete challenge")
+  if (error) {
+    console.error("Supabase error deleting challenge:", error);
+    throw new Error("Failed to delete challenge");
   }
-   
-  return "Deleted successfully"
 
+  if (!data) {
+    throw new Error("Challenge not found");
+  }
+
+  return data; 
 }

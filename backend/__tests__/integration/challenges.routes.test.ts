@@ -4,6 +4,7 @@ import {
   getChallenges,
   createChallenge,
   updateChallenge,
+  deleteChallenge,
 } from "../../src/services/challenges.service";
 import { supabase } from "../../src/services/supabaseClient";
 
@@ -451,3 +452,35 @@ describe("PATCH /api/challenges/:id", () => {
       expect(response.body.error).toBe("Failed to update challenge");
   });
 });
+
+describe("DELETE /api/challenges/:id",  () => {
+  it("returns 200 with the deleted challenge", async () => {
+    const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
+    const fakeChallengeId = 234;
+
+    const deletedChallengeData = {
+      id: fakeChallengeId,
+      user_id: fakeUserId,
+      name: "Challenge to delete",
+      description: "This will be deleted",
+      created_at: "2026-01-04T15:57:53.336Z",
+      updated_at: "2026-01-04T15:57:53.336Z",
+    };
+
+    (deleteChallenge as jest.Mock).mockResolvedValue(deletedChallengeData);
+
+
+    (supabase.auth.getUser as jest.Mock).mockResolvedValue({
+      data: { user: { id: fakeUserId } },
+      error: null,
+    });
+
+    const response = await request(app)
+    .delete(`/api/challenges/${fakeChallengeId}`)
+    .set("Authorization", "Bearer any-fake-token")
+    .expect(200);
+
+
+    expect(response).toEqual(deletedChallengeData)
+  })
+})

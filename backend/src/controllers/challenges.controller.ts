@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import {
   createChallenge,
+  deleteChallenge,
   getChallenges,
   updateChallenge,
 } from "../services/challenges.service";
@@ -85,9 +86,9 @@ export const updateMyChallenge = async (
     const supabase = req.supabase;
     const userId = req.user?.id;
     const challengeId = Number(req.params.challengeId);
-   
+
     const parsed = postChallengeSchema.safeParse(req.body);
-    
+
     if (!parsed.success) {
       res.status(400).json({
         error: "Invalid request body",
@@ -100,7 +101,6 @@ export const updateMyChallenge = async (
       ...parsed.data,
       description: parsed.data.description ?? null,
     };
-  
 
     if (!supabase) {
       res.status(500).json({ error: "Supabase client not found in request" });
@@ -117,8 +117,6 @@ export const updateMyChallenge = async (
       return;
     }
 
- 
-
     const challengeUpdated = await updateChallenge(
       supabase,
       userId,
@@ -129,5 +127,40 @@ export const updateMyChallenge = async (
     res.status(200).json(challengeUpdated);
   } catch (error) {
     res.status(500).json({ error: "Failed to update challenge" });
+  }
+};
+
+export const deleteMyChallenge = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const supabase = req.supabase;
+    const userId = req.user?.id;
+    const challengeId = Number(req.params.challengeId);
+
+    if (!supabase) {
+      res.status(500).json({ error: "Supabase client not found in request" });
+      return;
+    }
+
+    if (!userId) {
+      res.status(401).json({ error: "Unauthorized: No user ID found" });
+      return;
+    }
+    if (Number.isNaN(challengeId)) {
+      res.status(400).json({ error: "Invalid challenge id" });
+      return;
+    }
+
+    const deletedChallenge = await deleteChallenge(
+      supabase,
+      userId,
+      challengeId
+    );
+
+    res.status(200).json(deletedChallenge);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to delete challenge" });
   }
 };

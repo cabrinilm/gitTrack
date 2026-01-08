@@ -3,7 +3,7 @@ import {
   getChallenges,
   createChallenge,
   updateChallenge,
-  deleteChallenge
+  deleteChallenge,
 } from "../../src/services/challenges.service";
 
 describe("Challenges GET", () => {
@@ -245,32 +245,42 @@ describe("Challenges PATCH", () => {
 });
 
 describe("Challenges DELETE", () => {
-  it.only("should return the success message for challenge deleted", async () => {
+  it("should return the deleted challenge data", async () => {
     const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
     const fakeChallengeId = 2;
-
+  
+    const deletedChallengeData = {
+      id: fakeChallengeId,
+      user_id: fakeUserId,
+      name: "Challenge to delete",
+      description: "This will be deleted",
+      created_at: "2026-01-04T15:57:53.336Z",
+      updated_at: "2026-01-04T15:57:53.336Z",
+    };
+  
     const mockSupabase = {
       from: () => ({
         delete: () => ({
-          eq: (column1: string, value1: string) => ({
-            eq: (column2: number, value2: number) => ({
-              select: async () => ({
-                data: { message: "Deleted successfully" },
-                error: null,
+          eq: (column1: string, value1: any) => ({
+            eq: (column2: string, value2: any) => ({
+              select: () => ({
+                single: async () => ({
+                  data: deletedChallengeData,
+                  error: null,
+                }),
               }),
             }),
           }),
         }),
       }),
     };
-
-    const deletedChallenge = await deleteChallenge(
+  
+    const result = await deleteChallenge(
       mockSupabase as any,
       fakeUserId,
       fakeChallengeId
     );
-
-    expect(deletedChallenge).toEqual("Deleted successfully")
-
+  
+    expect(result).toEqual(deletedChallengeData);
   });
 });
