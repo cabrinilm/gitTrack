@@ -260,7 +260,7 @@ describe("POST /api/challenges", () => {
 describe("PATCH /api/challenges/:id", () => {
   it("returns 200 and the updated challenge when update is successful", async () => {
     const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
-    const fakeChallengeId = 234;
+    const fakeChallengeId = "234";
 
     const update = {
       name: "Name updated",
@@ -293,13 +293,13 @@ describe("PATCH /api/challenges/:id", () => {
     expect(updateChallenge).toHaveBeenCalledWith(
       expect.anything(),
       fakeUserId,
-      fakeChallengeId,
+      Number(fakeChallengeId),
       update
     );
   });
   it("returns 200 and the updated challenge when update without description is successful", async () => {
     const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
-    const fakeChallengeId = 234;
+    const fakeChallengeId = "234";
 
     const update = {
       name: "Name updated",
@@ -331,12 +331,12 @@ describe("PATCH /api/challenges/:id", () => {
     expect(updateChallenge).toHaveBeenCalledWith(
       expect.anything(),
       fakeUserId,
-      fakeChallengeId,
+      Number(fakeChallengeId),
       update
     );
   });
   it("return 401 if no token is provided", async () => {
-    const fakeChallengeId = 234;
+    const fakeChallengeId = "234";
 
     const update = {
       name: "Name updated",
@@ -350,7 +350,7 @@ describe("PATCH /api/challenges/:id", () => {
   });
   it("return 400 when challenge name exceeds maximum length", async () => {
     const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
-    const fakeChallengeId = 234;
+    const fakeChallengeId = "234";
 
     const update = {
       name: "Basic goals,Basic goals,Basic goals",
@@ -375,7 +375,7 @@ describe("PATCH /api/challenges/:id", () => {
   });
   it("return 400 when challenge name is an empty string", async () => {
     const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
-    const fakeChallengeId = 234;
+    const fakeChallengeId = "234";
 
     const update = {
       name: "",
@@ -400,7 +400,7 @@ describe("PATCH /api/challenges/:id", () => {
   });
   it("return 400 when challenge description exceeds maximum length", async () => {
     const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
-    const fakeChallengeId = 234;
+    const fakeChallengeId = "234";
 
     const update = {
       name: "New Challenge",
@@ -426,7 +426,7 @@ describe("PATCH /api/challenges/:id", () => {
   });
   it("return 500 when if an unexpected server error occurs", async () => {
     const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
-    const fakeChallengeId = 234;
+    const fakeChallengeId = "234";
 
     const update = {
       name: "New Challenge",
@@ -456,7 +456,7 @@ describe("PATCH /api/challenges/:id", () => {
 describe("DELETE /api/challenges/:id",  () => {
   it("returns 200 with the deleted challenge", async () => {
     const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
-    const fakeChallengeId = 234;
+    const fakeChallengeId = "234";
 
     const deletedChallengeData = {
       id: fakeChallengeId,
@@ -481,6 +481,31 @@ describe("DELETE /api/challenges/:id",  () => {
     .expect(200);
 
 
-    expect(response).toEqual(deletedChallengeData)
-  })
+    expect(response.body).toEqual(deletedChallengeData)
+  });
+  it("returns 401 if no token is provided", async () => {
+    const response = await request(app).delete(`/api/challenges/1`).expect(401);
+
+    expect(response.body.error).toEqual("No token provided");
+  });
+  it.only("should return 400 if challenge id is invalid", async () => {
+    const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
+    const fakeChallengeId = "234@";
+
+  
+    (supabase.auth.getUser as jest.Mock).mockResolvedValue({
+      data: { user: { id: fakeUserId } },
+      error: null,
+    });
+  
+  
+    const response = await request(app)
+      .delete(`/api/challenges/${fakeChallengeId}`)
+      .set("Authorization", "Bearer any-fake-token")
+      .expect(400);
+   
+    
+      
+    expect(response.body.error).toBe("Invalid challenge id");
+  });
 })

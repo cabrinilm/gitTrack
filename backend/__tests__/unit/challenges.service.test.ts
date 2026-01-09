@@ -283,4 +283,29 @@ describe("Challenges DELETE", () => {
   
     expect(result).toEqual(deletedChallengeData);
   });
+  it("should throw an error if Supabase returns an error", async () => {
+    const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
+    const fakeChallengeId = 2;
+
+    const mockSupabase = {
+      from: () => ({
+        delete: () => ({
+          eq: (column1: string, value1: any) => ({
+            eq: (column2: string, value2: any) => ({
+              select: () => ({
+                single: async () => ({
+                  data: null,
+                  error: {message: "Failed to delete challenge"},
+                }),
+              }),
+            }),
+          }),
+        }),
+      }),
+    };
+    
+    await expect(
+      deleteChallenge(mockSupabase as any, fakeUserId, fakeChallengeId)
+    ).rejects.toThrow("Failed to delete challenge");
+  });
 });
