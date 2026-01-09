@@ -5,10 +5,13 @@ import {
   updateChallenge,
   deleteChallenge,
 } from "../../src/services/challenges.service";
+describe("Challenges", () => {
+  const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
+  const fakeChallengeId = 2;
 
-describe("Challenges GET", () => {
+describe("GET /api/challenges", () => {
   it("should return all challenges created by user", async () => {
-    const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
+    
 
     const listChallenges = [
       {
@@ -44,7 +47,8 @@ describe("Challenges GET", () => {
     expect(userChallenges).toEqual(listChallenges);
   });
   it("should return an empty array if user does not have created challenges", async () => {
-    const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
+    
+    
 
     const mockSupabase = {
       from: () => ({
@@ -65,7 +69,7 @@ describe("Challenges GET", () => {
     expect(userChallenges).toEqual([]);
   });
   it("should throw an error if Supabase return an error", async () => {
-    const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
+    
 
     const mockSupabase = {
       from: () => ({
@@ -84,14 +88,17 @@ describe("Challenges GET", () => {
   });
 });
 
-describe("Challenges POST", () => {
-  it("should return the challenge created by user", async () => {
-    const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
+describe("POST /api/challenges", () => {
 
-    const newChallenge = {
-      name: "Basic goals",
-      description: "I want to learn 3 new activities",
-    };
+  const newChallenge = {
+    name: "Basic goals",
+    description: "I want to learn 3 new activities",
+  };
+
+  it("should return the challenge created by user", async () => {
+    
+
+    
 
     const challengeCreated = {
       ...newChallenge,
@@ -129,12 +136,9 @@ describe("Challenges POST", () => {
     expect(userChallenges).toEqual(challengeCreated);
   });
   it("should throw an error if Supabase returns an error", async () => {
-    const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
+    
 
-    const newChallenge = {
-      name: "Basic goals",
-      description: "I want to learn 3 new activities",
-    };
+    
 
     const mockSupabase = {
       from: () => ({
@@ -155,10 +159,10 @@ describe("Challenges POST", () => {
   });
 });
 
-describe("Challenges PATCH", () => {
+describe("PATCH /api/challenges/:challengeId", () => {
   it("should update challenge and return updated data", async () => {
-    const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
-    const fakeChallengeId = 2;
+    
+    
 
     const updates = {
       name: "Name updated",
@@ -214,7 +218,7 @@ describe("Challenges PATCH", () => {
     expect(updated).toEqual(expectedUpdatedChallenge);
   });
   it("should throw an error if Supabase returns an error", async () => {
-    const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
+    
     const fakeChallengeId = 2;
     const updates = {
       name: "Name updated",
@@ -244,9 +248,9 @@ describe("Challenges PATCH", () => {
   });
 });
 
-describe("Challenges DELETE", () => {
+describe("DELETE  /api/challenges/:challengeId", () => {
   it("should return the deleted challenge data", async () => {
-    const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
+    
     const fakeChallengeId = 2;
   
     const deletedChallengeData = {
@@ -284,8 +288,8 @@ describe("Challenges DELETE", () => {
     expect(result).toEqual(deletedChallengeData);
   });
   it("should throw an error if Supabase returns an error", async () => {
-    const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
-    const fakeChallengeId = 2;
+    
+    
 
     const mockSupabase = {
       from: () => ({
@@ -308,4 +312,5 @@ describe("Challenges DELETE", () => {
       deleteChallenge(mockSupabase as any, fakeUserId, fakeChallengeId)
     ).rejects.toThrow("Failed to delete challenge");
   });
+});
 });
