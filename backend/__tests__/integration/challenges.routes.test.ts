@@ -488,7 +488,7 @@ describe("DELETE /api/challenges/:id",  () => {
 
     expect(response.body.error).toEqual("No token provided");
   });
-  it.only("should return 400 if challenge id is invalid", async () => {
+  it("should return 400 if challenge id is invalid", async () => {
     const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
     const fakeChallengeId = "234@";
 
@@ -507,5 +507,27 @@ describe("DELETE /api/challenges/:id",  () => {
     
       
     expect(response.body.error).toBe("Invalid challenge id");
+  });
+  it("return 500 when if an unexpected server error occurs", async () => {
+    const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
+    const fakeChallengeId = "234";
+
+  
+
+    (deleteChallenge as jest.Mock).mockRejectedValue(
+      new Error("Failed to delete challenge")
+    );
+
+    (supabase.auth.getUser as jest.Mock).mockResolvedValue({
+      data: { user: { id: fakeUserId } },
+      error: null,
+    });
+
+    const response = await request(app)
+      .delete(`/api/challenges/${fakeChallengeId}`)
+      .set("Authorization", "Bearer any-fake-token")
+      .expect(500);
+
+      expect(response.body.error).toBe("Failed to delete challenge");
   });
 })
