@@ -18,6 +18,30 @@ export async function getChallenges(
   return data ?? [];
 }
 
+export async function getChallengesById(supabase:SupabaseClient<Database>,
+  userId: string,
+  challengeId: number
+): Promise<Challenges>{
+
+  const {data, error} = await supabase
+  .from("challenges")
+  .select("*")
+  .eq("user_id", userId)
+  .eq("challenge_id", challengeId)
+  .single();
+
+  if(error){
+    throw new Error("Failed to fetch challenge")
+  }
+
+  if(!data){
+    throw new Error("Challenge does not exist")
+  }
+
+  return data;
+  
+}
+
 export async function createChallenge(
   supabase: SupabaseClient<Database>,
   userId: string,
