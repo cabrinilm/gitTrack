@@ -82,44 +82,64 @@ describe("Challenges", () => {
     });
   });
   describe("GET /api/challenges/:challengeId", () => {
-    it.only("should return the challenge selected by user", async () => {;
-
-    const mockSupabase = {
-      from: () => ({
-        select: () => ({
-          eq: (col1: string, val1: any) => ({
-            eq: (col2: string, val2: any) => ({
-              single: async () => ({
-                data: {
-                  id: fakeChallengeId,
-                  user_id: fakeUserId,
-                  name: "Basic goals",
-                  description: "I want to learn 3 new activities",
-                  created_at: new Date().toISOString(),
-                },
-                error: null,
+    it("should return the challenge selected by user", async () => {
+      const mockSupabase = {
+        from: () => ({
+          select: () => ({
+            eq: (col1: string, val1: any) => ({
+              eq: (col2: string, val2: any) => ({
+                single: async () => ({
+                  data: {
+                    id: fakeChallengeId,
+                    user_id: fakeUserId,
+                    name: "Basic goals",
+                    description: "I want to learn 3 new activities",
+                    created_at: new Date().toISOString(),
+                  },
+                  error: null,
+                }),
               }),
             }),
           }),
         }),
-      }),
-    };
-  
-    const userChallenge: Challenges = await getChallengesById(
-      mockSupabase as any,
-      fakeUserId,
-      fakeChallengeId
-    );
- 
-    expect(userChallenge).toEqual(expect.objectContaining({
-      id: fakeChallengeId,
-      user_id: fakeUserId,
-      name: "Basic goals",
-      description: "I want to learn 3 new activities",
-    }));
-  });
-});
+      };
 
+      const userChallenge: Challenges = await getChallengesById(
+        mockSupabase as any,
+        fakeUserId,
+        fakeChallengeId
+      );
+
+      expect(userChallenge).toEqual(
+        expect.objectContaining({
+          id: fakeChallengeId,
+          user_id: fakeUserId,
+          name: "Basic goals",
+          description: "I want to learn 3 new activities",
+        })
+      );
+    });
+    it.only("should throw an error if Supabase returns an error", async () => {
+      const mockSupabase = {
+        from: () => ({
+          select: () => ({
+            eq: (col1: string, val1: any) => ({
+              eq: (col2: string, val2: any) => ({
+                single: async () => ({
+                  data: null,
+                  error: { message: "Failed to fetch challenge " },
+                }),
+              }),
+            }),
+          }),
+        }),
+      };
+
+      await expect(
+        getChallengesById(mockSupabase as any, fakeUserId, fakeChallengeId)
+      ).rejects.toThrow("Failed to fetch challenge");
+    });
+  });
 
   describe("POST /api/challenges", () => {
     const newChallenge = {
