@@ -18,7 +18,7 @@ export async function getChallenges(
   return data ?? [];
 }
 
-export async function getChallengesById(supabase:SupabaseClient<Database>,
+export async function getChallengeById(supabase:SupabaseClient<Database>,
   userId: string,
   challengeId: number
 ): Promise<Challenges>{

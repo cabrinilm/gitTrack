@@ -1,7 +1,7 @@
 import type { Challenges } from "../../src/services/challenges.service";
 import {
   getChallenges,
-  getChallengesById,
+  getChallengeById,
   createChallenge,
   updateChallenge,
   deleteChallenge,
@@ -104,7 +104,7 @@ describe("Challenges", () => {
         }),
       };
 
-      const userChallenge: Challenges = await getChallengesById(
+      const userChallenge: Challenges = await getChallengeById(
         mockSupabase as any,
         fakeUserId,
         fakeChallengeId
@@ -119,7 +119,7 @@ describe("Challenges", () => {
         })
       );
     });
-    it.only("should throw an error if Supabase returns an error", async () => {
+    it("should throw an error if Supabase returns an error", async () => {
       const mockSupabase = {
         from: () => ({
           select: () => ({
@@ -136,7 +136,7 @@ describe("Challenges", () => {
       };
 
       await expect(
-        getChallengesById(mockSupabase as any, fakeUserId, fakeChallengeId)
+        getChallengeById(mockSupabase as any, fakeUserId, fakeChallengeId)
       ).rejects.toThrow("Failed to fetch challenge");
     });
   });

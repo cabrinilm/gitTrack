@@ -5,6 +5,7 @@ import {
   createChallenge,
   updateChallenge,
   deleteChallenge,
+  getChallengeById,
 } from "../../src/services/challenges.service";
 import { supabase } from "../../src/services/supabaseClient";
 
@@ -82,6 +83,38 @@ describe("Challenges", () => {
         .expect(500);
 
       expect(response.body.error).toBe("Failed to fetch challenges");
+    });
+  });
+  describe("GET /api/challenges/:challengeId", () => {
+    it("return 200 and the selected challenge", async () => {
+      const selectedChallenge = {
+        id: fakeChallengeId,
+        user_id: fakeUserId,
+        name: "Basic goals",
+        description: "I want to learn 3 new activities",
+        created_at: new Date().toISOString(),
+      };
+
+      (getChallengeById as jest.Mock).mockResolvedValue(selectedChallenge);
+
+      const response = await request(app)
+        .get(`/api/challenges/${fakeChallengeId}`)
+        .set("Authorization", "Bearer any-fake-token")
+        .expect(200);
+
+      expect(response.body).toEqual(selectedChallenge);
+      expect(getChallengeById).toHaveBeenCalledWith(
+        expect.any(Object),
+        fakeUserId,
+        Number(fakeChallengeId)
+      );
+    });
+    it.only("return 401 if no token is provided", async () => {
+      const response = await request(app)
+        .get(`/api/challenges/${fakeChallengeId}`)
+        .expect(401);
+
+      expect(response.body.error).toEqual("No token provided");
     });
   });
 

@@ -1,7 +1,9 @@
 import type { Request, Response } from "express";
 import {
+  Challenges,
   createChallenge,
   deleteChallenge,
+  getChallengeById,
   getChallenges,
   updateChallenge,
 } from "../services/challenges.service";
@@ -31,6 +33,44 @@ export const getMyChallenges = async (
     res.status(200).json(challenges);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch challenges" });
+  }
+};
+
+
+export const getMyChallengeById = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try{
+    const supabase = req.supabase;
+    const userId = req.user?.id;
+    const challengeId = Number(req.params.challengeId);
+
+    if (!supabase) {
+      res.status(500).json({ error: "Supabase client not found in request" });
+      return;
+    }
+
+    if (!userId) {
+      res.status(401).json({ error: "Unauthorized: No user ID found" });
+      return;
+    }
+    if (Number.isNaN(challengeId)) {
+      res.status(400).json({ error: "Invalid challenge id" });
+      return;
+    }
+
+    const challenge = await getChallengeById(supabase, userId, challengeId);
+
+    if (!challenge) {
+      res.status(404).json({ error: "Challenge not found or does not belong to you" });
+      return;
+    }
+
+    res.status(200).json(challenge);
+  } catch (error) {
+    console.error("Error fetching challenge by ID:", error);
+    res.status(500).json({ error: "Failed to fetch challenge" });
   }
 };
 
