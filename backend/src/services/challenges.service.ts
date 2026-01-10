@@ -35,7 +35,7 @@ export async function getChallengeById(supabase:SupabaseClient<Database>,
   }
 
   if(!data){
-    throw new Error("Challenge does not exist")
+    throw new Error("Challenge not found or does not belong to you")
   }
 
   return data;

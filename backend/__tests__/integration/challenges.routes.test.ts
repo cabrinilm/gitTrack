@@ -24,7 +24,7 @@ describe("Challenges", () => {
   });
 
   describe("GET /api/challenges", () => {
-    it("should return 200 and all challenges created by the user", async () => {
+    it("return 200 and all challenges created by the user", async () => {
       const listChallenges = [
         {
           user_id: fakeUserId,
@@ -53,7 +53,7 @@ describe("Challenges", () => {
         fakeUserId
       );
     });
-    it("should return 200 and empty array if user does not have created challenges", async () => {
+    it("return 200 and empty array if user does not have created challenges", async () => {
       (getChallenges as jest.Mock).mockResolvedValue([]);
 
       const response = await request(app)
@@ -67,12 +67,12 @@ describe("Challenges", () => {
         fakeUserId
       );
     });
-    it("should return 401 if no token is provided", async () => {
+    it("return 401 if no token is provided", async () => {
       const response = await request(app).get("/api/challenges").expect(401);
 
       expect(response.body.error).toEqual("No token provided");
     });
-    it("should return 500 if an unexpected server error occurs", async () => {
+    it("return 500 if an unexpected server error occurs", async () => {
       (getChallenges as jest.Mock).mockRejectedValue(
         new Error("Failed to fetch challenges")
       );
@@ -109,17 +109,27 @@ describe("Challenges", () => {
         Number(fakeChallengeId)
       );
     });
-    it.only("return 401 if no token is provided", async () => {
+    it("return 401 if no token is provided", async () => {
       const response = await request(app)
         .get(`/api/challenges/${fakeChallengeId}`)
         .expect(401);
 
       expect(response.body.error).toEqual("No token provided");
     });
+    it("return 500 if an unexpected server error occurs", async () => {
+      (getChallengeById as jest.Mock).mockRejectedValue(null);
+
+      const response = await request(app)
+        .get(`/api/challenges/123`)
+        .set("Authorization", "Bearer any-fake-token")
+        .expect(500);
+
+      expect(response.body.error).toEqual("Failed to fetch challenge");
+    });
   });
 
   describe("POST /api/challenges", () => {
-    it("should return 201 and the challenge created", async () => {
+    it("return 201 and the challenge created", async () => {
       const newChallenge = {
         name: "Basic goals",
         description: "I want to learn 3 new activities",
@@ -143,7 +153,7 @@ describe("Challenges", () => {
 
       expect(response.body).toEqual(challengeCreated);
     });
-    it("should return 201 and the challenge created if description is empty", async () => {
+    it("return 201 and the challenge created if description is empty", async () => {
       const newChallenge = {
         name: "Basic goals",
         description: "",
@@ -167,12 +177,12 @@ describe("Challenges", () => {
 
       expect(response.body).toEqual(challengeCreated);
     });
-    it("should return 401 if no token is provided", async () => {
+    it("return 401 if no token is provided", async () => {
       const response = await request(app).post("/api/challenges").expect(401);
 
       expect(response.body.error).toEqual("No token provided");
     });
-    it("should return 400 when challenge name exceeds maximum length", async () => {
+    it("return 400 when challenge name exceeds maximum length", async () => {
       const newChallenge = {
         name: "Basic goals,Basic goals,Basic goals",
         description: "I want to learn 3 new activities",
@@ -189,7 +199,7 @@ describe("Challenges", () => {
         "Name too long",
       ]);
     });
-    it("should return 400 when challenge name is an empty string", async () => {
+    it("return 400 when challenge name is an empty string", async () => {
       const newChallenge = {
         name: "",
         description: "I want to learn 3 new activities",
@@ -206,7 +216,7 @@ describe("Challenges", () => {
         "Name cannot be empty",
       ]);
     });
-    it("should return 400 when challenge description exceeds maximum length", async () => {
+    it("return 400 when challenge description exceeds maximum length", async () => {
       const newChallenge = {
         name: "New Challenge",
         description:
@@ -224,7 +234,7 @@ describe("Challenges", () => {
         "Description too long",
       ]);
     });
-    it("should return 500 if an unexpected server error occurs", async () => {
+    it("return 500 if an unexpected server error occurs", async () => {
       const newChallenge = {
         name: "New Challenge",
         description: "I want to learn 3 new activities.",

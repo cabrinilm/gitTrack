@@ -62,10 +62,6 @@ export const getMyChallengeById = async (
 
     const challenge = await getChallengeById(supabase, userId, challengeId);
 
-    if (!challenge) {
-      res.status(404).json({ error: "Challenge not found or does not belong to you" });
-      return;
-    }
 
     res.status(200).json(challenge);
   } catch (error) {
