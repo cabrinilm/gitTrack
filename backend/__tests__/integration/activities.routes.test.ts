@@ -20,7 +20,7 @@ describe("Activities", () => {
   });
 
   describe("GET /api/activities", () => {
-    it("return 200 and all activities create by user", async () => {
+    it("returns 200 and all activities create by user", async () => {
       const listActivities = [
         {
           id: 1,
@@ -60,19 +60,71 @@ describe("Activities", () => {
       );
 
       
-    })
+    });
+    it("returns 200 and an empty array when the user has no activities", async () => {
+      (getActivities as jest.Mock).mockResolvedValue([]);
+
+      const response = await request(app)
+      .get(`/api/${fakeChallengeId}/activities`)
+      .set("Authorization", "Bearer any-fake-token")
+      .expect(200)
+
+      expect(response.body).toEqual([])
+      expect(getActivities).toHaveBeenCalledWith(
+        expect.any(Object),
+        fakeUserId,
+        fakeChallengeId
+      )
+    });
+    
+    it("returns 401 if no token is provided", async () => {
+
+      const response = await request(app)
+      .get(`/api/${fakeChallengeId}/activities`)
+      .expect(401);
+
+      expect(response.body.error).toEqual("No token provided");
+    });
+    it("returns 404 if challenge id is no provided", async () => {
+
+      const response = await request(app)
+      .get(`/api/activities`)
+      .set("Authorization", "Bearer any-fake-token")
+      .expect(404)
+
+
+    });
+    it("returns 400 when challenge id is invalid", async () => {
+
+      const response = await request(app)
+      .get(`/api/@/activities`)
+      .set("Authorization", "Bearer any-fake-token")
+      .expect(400)
+
+
+      expect(response.body.error).toEqual("Invalid challenge id")
+
+
+
+
+    });
+    it("returns 500 when if an unexpected server error occurs", async () => {
+
+      (getActivities as jest.Mock).mockRejectedValue(
+        new Error("Failed to fetch activities")
+      );
+
+
+      const response = await request(app)
+      .get(`/api/${fakeChallengeId}/activities`)
+      .set("Authorization", "Bearer any-fake-token")
+      .expect(500)
+
+      expect(response.body.error).toBe("Failed to fetch activities");
+
+    });
+    
+    });
 
 });
 
-
-
-
-
-
-
-
-
-
-
-
-});

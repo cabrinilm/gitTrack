@@ -24,7 +24,7 @@ describe("Challenges", () => {
   });
 
   describe("GET /api/challenges", () => {
-    it("return 200 and all challenges created by the user", async () => {
+    it("returns 200 and all challenges created by the user", async () => {
       const listChallenges = [
         {
           user_id: fakeUserId,
@@ -53,7 +53,7 @@ describe("Challenges", () => {
         fakeUserId
       );
     });
-    it("return 200 and empty array if user does not have created challenges", async () => {
+    it("returns 200 and empty array if user does not have created challenges", async () => {
       (getChallenges as jest.Mock).mockResolvedValue([]);
 
       const response = await request(app)
@@ -67,12 +67,12 @@ describe("Challenges", () => {
         fakeUserId
       );
     });
-    it("return 401 if no token is provided", async () => {
+    it("returns 401 if no token is provided", async () => {
       const response = await request(app).get("/api/challenges").expect(401);
 
       expect(response.body.error).toEqual("No token provided");
     });
-    it("return 500 if an unexpected server error occurs", async () => {
+    it("returns 500 if an unexpected server error occurs", async () => {
       (getChallenges as jest.Mock).mockRejectedValue(
         new Error("Failed to fetch challenges")
       );
@@ -86,7 +86,7 @@ describe("Challenges", () => {
     });
   });
   describe("GET /api/challenges/:challengeId", () => {
-    it("return 200 and the selected challenge", async () => {
+    it("returns 200 and the selected challenge", async () => {
       const selectedChallenge = {
         id: fakeChallengeId,
         user_id: fakeUserId,
@@ -109,14 +109,14 @@ describe("Challenges", () => {
         Number(fakeChallengeId)
       );
     });
-    it("return 401 if no token is provided", async () => {
+    it("returns 401 if no token is provided", async () => {
       const response = await request(app)
         .get(`/api/challenges/${fakeChallengeId}`)
         .expect(401);
 
       expect(response.body.error).toEqual("No token provided");
     });
-    it("return 500 if an unexpected server error occurs", async () => {
+    it("returns 500 if an unexpected server error occurs", async () => {
       (getChallengeById as jest.Mock).mockRejectedValue(null);
 
       const response = await request(app)
@@ -129,7 +129,7 @@ describe("Challenges", () => {
   });
 
   describe("POST /api/challenges", () => {
-    it("return 201 and the challenge created", async () => {
+    it("returns 201 and the challenge created", async () => {
       const newChallenge = {
         name: "Basic goals",
         description: "I want to learn 3 new activities",
@@ -153,7 +153,7 @@ describe("Challenges", () => {
 
       expect(response.body).toEqual(challengeCreated);
     });
-    it("return 201 and the challenge created if description is empty", async () => {
+    it("returns 201 and the challenge created if description is empty", async () => {
       const newChallenge = {
         name: "Basic goals",
         description: "",
@@ -177,12 +177,12 @@ describe("Challenges", () => {
 
       expect(response.body).toEqual(challengeCreated);
     });
-    it("return 401 if no token is provided", async () => {
+    it("returns 401 if no token is provided", async () => {
       const response = await request(app).post("/api/challenges").expect(401);
 
       expect(response.body.error).toEqual("No token provided");
     });
-    it("return 400 when challenge name exceeds maximum length", async () => {
+    it("returns 400 when challenge name exceeds maximum length", async () => {
       const newChallenge = {
         name: "Basic goals,Basic goals,Basic goals",
         description: "I want to learn 3 new activities",
@@ -199,7 +199,7 @@ describe("Challenges", () => {
         "Name too long",
       ]);
     });
-    it("return 400 when challenge name is an empty string", async () => {
+    it("returns 400 when challenge name is an empty string", async () => {
       const newChallenge = {
         name: "",
         description: "I want to learn 3 new activities",
@@ -216,7 +216,7 @@ describe("Challenges", () => {
         "Name cannot be empty",
       ]);
     });
-    it("return 400 when challenge description exceeds maximum length", async () => {
+    it("returns 400 when challenge description exceeds maximum length", async () => {
       const newChallenge = {
         name: "New Challenge",
         description:
@@ -234,7 +234,7 @@ describe("Challenges", () => {
         "Description too long",
       ]);
     });
-    it("return 500 if an unexpected server error occurs", async () => {
+    it("returns 500 if an unexpected server error occurs", async () => {
       const newChallenge = {
         name: "New Challenge",
         description: "I want to learn 3 new activities.",
@@ -320,7 +320,7 @@ describe("Challenges", () => {
         update
       );
     });
-    it("return 401 if no token is provided", async () => {
+    it("returns 401 if no token is provided", async () => {
       const update = {
         name: "Name updated",
       };
@@ -331,7 +331,7 @@ describe("Challenges", () => {
 
       expect(response.body.error).toEqual("No token provided");
     });
-    it("return 400 when challenge name exceeds maximum length", async () => {
+    it("returns 400 when challenge name exceeds maximum length", async () => {
       const update = {
         name: "Basic goals,Basic goals,Basic goals",
         description: "I want to learn 3 new activities",
@@ -348,7 +348,7 @@ describe("Challenges", () => {
         "Name too long",
       ]);
     });
-    it("return 400 when challenge name is an empty string", async () => {
+    it("returns 400 when challenge name is an empty string", async () => {
       const update = {
         name: "",
         description: "I want to learn 3 new activities",
@@ -365,7 +365,7 @@ describe("Challenges", () => {
         "Name cannot be empty",
       ]);
     });
-    it("return 400 when challenge description exceeds maximum length", async () => {
+    it("returns 400 when challenge description exceeds maximum length", async () => {
       const update = {
         name: "New Challenge",
         description:
@@ -383,7 +383,7 @@ describe("Challenges", () => {
         "Description too long",
       ]);
     });
-    it("return 500 when if an unexpected server error occurs", async () => {
+    it("returns 500 when if an unexpected server error occurs", async () => {
       const update = {
         name: "New Challenge",
         description: "Activities",
@@ -430,7 +430,7 @@ describe("Challenges", () => {
 
       expect(response.body.error).toEqual("No token provided");
     });
-    it("should return 400 if challenge id is invalid", async () => {
+    it("returns 400 if challenge id is invalid", async () => {
       const fakeChallengeId = "234@";
 
       const response = await request(app)
@@ -440,7 +440,7 @@ describe("Challenges", () => {
 
       expect(response.body.error).toBe("Invalid challenge id");
     });
-    it("return 500 when if an unexpected server error occurs", async () => {
+    it("returns 500 when if an unexpected server error occurs", async () => {
       (deleteChallenge as jest.Mock).mockRejectedValue(
         new Error("Failed to delete challenge")
       );
