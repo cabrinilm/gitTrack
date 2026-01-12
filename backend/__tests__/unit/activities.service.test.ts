@@ -4,6 +4,7 @@ import { getActivities } from "../../src/services/activities.service";
 describe("Activities", () => {
   const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
   const fakeChallengeId = 2;
+  const fakeActivitieId = 4;
 
   describe("GET /api/:challengeId/activities", () => {
     it("returns activities for a valid request", async () => {
@@ -104,6 +105,56 @@ describe("Activities", () => {
       await expect(
         getActivities(mockSupabase as any, fakeUserId, fakeChallengeId)
       ).rejects.toThrow("Failed to fetch activities");
+    });
+  });
+  describe("GET /api/:challengeId/activitie/activitiesId" , () => {
+
+
+    it.only("returns specific activitie for a valid request", async () => {
+      const activitie = {
+        
+          id: 1,
+          challenge_id: fakeChallengeId,
+          name: "Gym workout",
+          duration_minutes: 60,
+          order_num: 1,
+      
+      }
+
+  
+
+
+      const mockSupabase = {
+        from: () => ({
+          select: () => ({
+            eq: (column: string, value: any) => ({
+              eq: (column2: string, value2: any) => ({
+                eq: (column3: string, value3: any) => ({
+                data:
+                  column === "user_id" &&
+                  value === fakeUserId &&
+                  column2 === "challenge_id" &&
+                  value2 === fakeChallengeId &&
+                  column3 === "id" && value3 === fakeActivitieId 
+                    ? activitie
+                    : [],
+                error: null,
+              }),
+              }),
+            }),
+          }),
+        }),
+      };
+
+      const userActivitie : Activities = await getActivitie(
+        mockSupabase as any,
+        fakeUserId,
+        fakeChallengeId,
+        fakeActivitieId
+      );
+
+      expect(userActivitie).toEqual(activitie);
+
     });
   });
 });
