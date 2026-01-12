@@ -1,10 +1,10 @@
 import type { Activities } from "../../src/services/activities.service";
-import { getActivities } from "../../src/services/activities.service";
+import { getActivities, getActivityById } from "../../src/services/activities.service";
 
 describe("Activities", () => {
   const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
   const fakeChallengeId = 2;
-  const fakeActivitieId = 4;
+  const fakeActivityId = 4;
 
   describe("GET /api/:challengeId/activities", () => {
     it("returns activities for a valid request", async () => {
@@ -111,7 +111,7 @@ describe("Activities", () => {
 
 
     it.only("returns specific activitie for a valid request", async () => {
-      const activitie = {
+      const activity = {
         
           id: 1,
           challenge_id: fakeChallengeId,
@@ -123,37 +123,39 @@ describe("Activities", () => {
 
   
 
-
       const mockSupabase = {
         from: () => ({
           select: () => ({
             eq: (column: string, value: any) => ({
               eq: (column2: string, value2: any) => ({
                 eq: (column3: string, value3: any) => ({
-                data:
-                  column === "user_id" &&
-                  value === fakeUserId &&
-                  column2 === "challenge_id" &&
-                  value2 === fakeChallengeId &&
-                  column3 === "id" && value3 === fakeActivitieId 
-                    ? activitie
-                    : [],
-                error: null,
-              }),
+                  single: async () => ({
+                    data:
+                      column === "user_id" &&
+                      value === fakeUserId &&
+                      column2 === "challenge_id" &&
+                      value2 === fakeChallengeId &&
+                      column3 === "id" &&
+                      value3 === fakeActivityId
+                        ? activity
+                        : null,
+                    error: null,
+                  }),
+                }),
               }),
             }),
           }),
         }),
       };
-
-      const userActivitie : Activities = await getActivitie(
+      
+      const userActivitie : Activities = await getActivityById(
         mockSupabase as any,
         fakeUserId,
         fakeChallengeId,
-        fakeActivitieId
+        fakeActivityId
       );
 
-      expect(userActivitie).toEqual(activitie);
+      expect(userActivitie).toEqual(activity);
 
     });
   });
