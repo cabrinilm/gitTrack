@@ -110,7 +110,7 @@ describe("Activities", () => {
   describe("GET /api/:challengeId/activitie/activitiesId" , () => {
 
 
-    it.only("returns specific activitie for a valid request", async () => {
+    it("returns specific activity for a valid request", async () => {
       const activity = {
         
           id: 1,
@@ -158,5 +158,29 @@ describe("Activities", () => {
       expect(userActivitie).toEqual(activity);
 
     });
+    it("should throw an error if Supabase returns an error", async () => {
+
+      const mockSupabase = {
+        from: () => ({
+          select: () => ({
+            eq: (column: string, value: any) => ({
+              eq: (column2: string, value2: any) => ({
+                eq: (column3: string, value3: any) => ({
+                  single: async () => ({
+                    data:  null,
+                    error: {message: "Failed to fetch activity"}
+                  }),
+                }),
+              }),
+            }),
+          }),
+        }),
+      };
+
+      await expect(
+              getActivityById(mockSupabase as any, fakeUserId, fakeChallengeId, fakeActivityId)
+            ).rejects.toThrow("Failed to fetch activity");
+    });
   });
+  
 });

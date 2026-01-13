@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import { getMyProfile, updateMyProfile } from './controllers/profile.controller';
 import { authMiddleware } from './middleware/auth';
 import { createMyChallenge, deleteMyChallenge, getMyChallengeById, getMyChallenges, updateMyChallenge } from "./controllers/challenges.controller";
-import { getMyActivities } from "./controllers/activities.controller";
+import { getMyActivities, getMyActivityById } from "./controllers/activities.controller";
 
 
 dotenv.config();
@@ -28,6 +28,7 @@ app.delete("/api/challenges/:challengeId", deleteMyChallenge);
 
 
 app.get("/api/:challengeId/activities", getMyActivities);
+app.get("/api/:challengeId/activities/:activityId", getMyActivityById);
 
 export default app; 
 
