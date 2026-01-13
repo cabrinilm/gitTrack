@@ -43,9 +43,8 @@ export const getMyActivityById = async (
     const userId = req.user?.id;
     const challengeId = Number(req.params.challengeId);
     const activityId =   Number(req.params.activityId);
-     console.log(activityId)
-     console.log(challengeId)
-
+   
+  
     if (!supabase) {
       res.status(500).json({ error: "Supabase client not found in request" });
       return;
@@ -60,7 +59,7 @@ export const getMyActivityById = async (
       return;
     }
     if (Number.isNaN(activityId)) {
-      res.status(400).json({ error: "Invalid challenge id" });
+      res.status(400).json({ error: "Invalid activity id" });
       return;
     }
 

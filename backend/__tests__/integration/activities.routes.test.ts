@@ -112,7 +112,7 @@ describe("Activities", () => {
     });
   });
    describe("GET /api/:challengeId/activities/:activityId",  () => {
-    it.only("returns 200 and the activity select by user", async () => {
+    it("returns 200 and the activity select by user", async () => {
 
 
       const activity: Activities =  {
@@ -142,6 +142,53 @@ describe("Activities", () => {
       fakeActivityId
     );
 
-    } )
-   })
+    });
+    it("returns 401 if no token is provided", async () => {
+      const response = await request(app)
+        .get(`/api/${fakeChallengeId}/activities/${fakeActivityId}`)
+        .expect(401);
+
+      expect(response.body.error).toEqual("No token provided");
+    });
+    it("returns 404 if challenge id is no provided", async () => {
+      const response = await request(app)
+        .get(`/api/activities`)
+        .set("Authorization", "Bearer any-fake-token")
+        .expect(404);
+    });
+    it("returns 404 when activity id is provided without challenge id", async () => {
+      const response = await request(app)
+        .get(`/api/activities/${fakeActivityId}`)
+        .set("Authorization", "Bearer any-fake-token")
+        .expect(404);
+    });
+    it("returns 400 when challenge id is invalid", async () => {
+      const response = await request(app)
+        .get(`/api/@/activities/${fakeActivityId}`)
+        .set("Authorization", "Bearer any-fake-token")
+        .expect(400);
+
+      expect(response.body.error).toEqual("Invalid challenge id");
+    });
+    it("returns 400 when activity id is invalid", async () => {
+      const response = await request(app)
+        .get(`/api/${fakeChallengeId}/activities/abc`)
+        .set("Authorization", "Bearer any-fake-token")
+        .expect(400);
+
+      expect(response.body.error).toEqual("Invalid activity id");
+   });
+   it("returns 500 when if an unexpected server error occurs", async () => {
+    (getActivityById as jest.Mock).mockRejectedValue(
+      new Error("Failed to fetch activities")
+    );
+
+    const response = await request(app)
+      .get(`/api/${fakeChallengeId}/activities/${fakeActivityId}`)
+      .set("Authorization", "Bearer any-fake-token")
+      .expect(500);
+
+    expect(response.body.error).toBe("Failed to fetch activity");
+  });
+});
 });
