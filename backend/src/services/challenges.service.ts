@@ -18,28 +18,27 @@ export async function getChallenges(
   return data ?? [];
 }
 
-export async function getChallengeById(supabase:SupabaseClient<Database>,
+export async function getChallengeById(
+  supabase: SupabaseClient<Database>,
   userId: string,
   challengeId: number
-): Promise<Challenges>{
+): Promise<Challenges> {
+  const { data, error } = await supabase
+    .from("challenges")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("challenge_id", challengeId)
+    .single();
 
-  const {data, error} = await supabase
-  .from("challenges")
-  .select("*")
-  .eq("user_id", userId)
-  .eq("challenge_id", challengeId)
-  .single();
-
-  if(error){
-    throw new Error("Failed to fetch challenge")
+  if (error) {
+    throw new Error("Failed to fetch challenge");
   }
 
-  if(!data){
-    throw new Error("Challenge not found or does not belong to you")
+  if (!data) {
+    throw new Error("Challenge not found or does not belong to you");
   }
 
   return data;
-  
 }
 
 export async function createChallenge(
@@ -53,10 +52,7 @@ export async function createChallenge(
     .select()
     .single();
 
-  if (error) {
-    throw new Error("Failed to create new challenge");
-  }
-  if (!data) {
+  if (error || !data) {
     throw new Error("Failed to create new challenge");
   }
 
@@ -71,7 +67,7 @@ export async function updateChallenge(
 ): Promise<Challenges> {
   const { data, error } = await supabase
     .from("challenges")
-    .update({...challenge, user_id: userId})
+    .update({ ...challenge, user_id: userId })
     .eq("id", challengeId)
     .eq("user_id", userId)
     .select()
@@ -105,5 +101,5 @@ export async function deleteChallenge(
     throw new Error("Challenge not found");
   }
 
-  return data; 
+  return data;
 }

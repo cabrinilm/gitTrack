@@ -30,6 +30,9 @@ app.delete("/api/challenges/:challengeId", deleteMyChallenge);
 app.get("/api/:challengeId/activities", getMyActivities);
 app.get("/api/:challengeId/activities/:activityId", getMyActivityById);
 
+
+
+
 export default app; 
 
 

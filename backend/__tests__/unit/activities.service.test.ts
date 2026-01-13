@@ -1,5 +1,10 @@
 import type { Activities } from "../../src/services/activities.service";
-import { getActivities, getActivityById } from "../../src/services/activities.service";
+import {
+  getActivities,
+  getActivityById,
+  createActivity
+  
+} from "../../src/services/activities.service";
 
 describe("Activities", () => {
   const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
@@ -107,21 +112,15 @@ describe("Activities", () => {
       ).rejects.toThrow("Failed to fetch activities");
     });
   });
-  describe("GET /api/:challengeId/activitie/activitiesId" , () => {
-
-
+  describe("GET /api/:challengeId/activities/activitiesId", () => {
     it("returns specific activity for a valid request", async () => {
       const activity = {
-        
-          id: 1,
-          challenge_id: fakeChallengeId,
-          name: "Gym workout",
-          duration_minutes: 60,
-          order_num: 1,
-      
-      }
-
-  
+        id: 1,
+        challenge_id: fakeChallengeId,
+        name: "Gym workout",
+        duration_minutes: 60,
+        order_num: 1,
+      };
 
       const mockSupabase = {
         from: () => ({
@@ -147,8 +146,8 @@ describe("Activities", () => {
           }),
         }),
       };
-      
-      const userActivitie : Activities = await getActivityById(
+
+      const userActivitie: Activities = await getActivityById(
         mockSupabase as any,
         fakeUserId,
         fakeChallengeId,
@@ -156,10 +155,8 @@ describe("Activities", () => {
       );
 
       expect(userActivitie).toEqual(activity);
-
     });
     it("should throw an error if Supabase returns an error", async () => {
-
       const mockSupabase = {
         from: () => ({
           select: () => ({
@@ -167,8 +164,8 @@ describe("Activities", () => {
               eq: (column2: string, value2: any) => ({
                 eq: (column3: string, value3: any) => ({
                   single: async () => ({
-                    data:  null,
-                    error: {message: "Failed to fetch activity"}
+                    data: null,
+                    error: { message: "Failed to fetch activity" },
                   }),
                 }),
               }),
@@ -178,9 +175,80 @@ describe("Activities", () => {
       };
 
       await expect(
-              getActivityById(mockSupabase as any, fakeUserId, fakeChallengeId, fakeActivityId)
-            ).rejects.toThrow("Failed to fetch activity");
+        getActivityById(
+          mockSupabase as any,
+          fakeUserId,
+          fakeChallengeId,
+          fakeActivityId
+        )
+      ).rejects.toThrow("Failed to fetch activity");
     });
   });
-  
+  describe("POST /api/:challengeId/activities", () => {
+    it.only("returns activity for a valid request", async () => {
+      const newActivity = {
+        name: "Gym workout",
+        duration_minutes: 60,
+      };
+
+      const activity: Activities = {
+        ...newActivity,
+        user_id: fakeUserId,
+        id: fakeActivityId,
+        challenge_id: fakeChallengeId,
+        order_num: 1,
+      };
+
+      const mockSupabase = {
+        from: jest.fn(),
+      };
+      
+      const mockSelect = jest.fn();
+      const mockEq = jest.fn();
+      const mockInsert = jest.fn();
+      const mockSingle = jest.fn();
+      
+      //  COUNT QUERY
+      mockEq.mockResolvedValueOnce({
+        count: 0,
+        error: null,
+      });
+      
+      mockSelect.mockReturnValueOnce({
+        eq: mockEq,
+      });
+      
+      //  INSERT QUERY
+      mockSingle.mockResolvedValueOnce({
+        data: {
+          ...newActivity,
+          id: fakeActivityId,
+          user_id: fakeUserId,
+          challenge_id: fakeChallengeId,
+          order_num: 1,
+        },
+        error: null,
+      });
+      
+      mockInsert.mockReturnValueOnce({
+        select: () => ({
+          single: mockSingle,
+        }),
+      });
+      
+      mockSupabase.from.mockReturnValue({
+        select: mockSelect,
+        insert: mockInsert,
+      });
+      
+      const userActivity: Activities = await createActivity(
+        mockSupabase as any,
+        fakeUserId,
+        fakeChallengeId,
+        newActivity
+      );
+
+      expect(userActivity).toEqual(activity);
+    });
+  });
 });
