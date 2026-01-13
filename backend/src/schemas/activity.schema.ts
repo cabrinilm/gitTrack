@@ -4,7 +4,7 @@ export const createActivitySchema = z.object({
   name: z
     .string()
     .min(1, "Activity name is required")
-    .max(150, "Activity name must be at most 150 characters"),
+    .max(30, "Activity name must be at most 150 characters"),
 
   duration_minutes: z
     .number()

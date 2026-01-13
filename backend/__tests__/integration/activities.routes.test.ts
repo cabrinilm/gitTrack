@@ -1,6 +1,11 @@
 import request from "supertest";
 import app from "../../src/server";
-import { Activities, getActivities, getActivityById } from "../../src/services/activities.service";
+import {
+  Activities,
+  createActivity,
+  getActivities,
+  getActivityById,
+} from "../../src/services/activities.service";
 import { supabase } from "../../src/services/supabaseClient";
 
 jest.mock("../../src/services/activities.service");
@@ -50,7 +55,7 @@ describe("Activities", () => {
       (getActivities as jest.Mock).mockResolvedValue(listActivities);
 
       const response = await request(app)
-        .get(`/api/${fakeChallengeId}/activities`)
+        .get(`/api/challenges/${fakeChallengeId}/activities`)
         .set("Authorization", "Bearer any-fake-token")
         .expect(200);
 
@@ -65,7 +70,7 @@ describe("Activities", () => {
       (getActivities as jest.Mock).mockResolvedValue([]);
 
       const response = await request(app)
-        .get(`/api/${fakeChallengeId}/activities`)
+        .get(`/api/challenges/${fakeChallengeId}/activities`)
         .set("Authorization", "Bearer any-fake-token")
         .expect(200);
 
@@ -79,20 +84,20 @@ describe("Activities", () => {
 
     it("returns 401 if no token is provided", async () => {
       const response = await request(app)
-        .get(`/api/${fakeChallengeId}/activities`)
+        .get(`/api/challenges/${fakeChallengeId}/activities`)
         .expect(401);
 
       expect(response.body.error).toEqual("No token provided");
     });
-    it("returns 404 if challenge id is no provided", async () => {
+    it("returns 400 if challenge id is no provided", async () => {
       const response = await request(app)
-        .get(`/api/activities`)
+        .get(`/api/challenges/activities`)
         .set("Authorization", "Bearer any-fake-token")
-        .expect(404);
+        .expect(400);
     });
     it("returns 400 when challenge id is invalid", async () => {
       const response = await request(app)
-        .get(`/api/@/activities`)
+        .get(`/api/challenges/@/activities`)
         .set("Authorization", "Bearer any-fake-token")
         .expect(400);
 
@@ -104,18 +109,16 @@ describe("Activities", () => {
       );
 
       const response = await request(app)
-        .get(`/api/${fakeChallengeId}/activities`)
+        .get(`/api/challenges/${fakeChallengeId}/activities`)
         .set("Authorization", "Bearer any-fake-token")
         .expect(500);
 
       expect(response.body.error).toBe("Failed to fetch activities");
     });
   });
-   describe("GET /api/:challengeId/activities/:activityId",  () => {
+  describe("GET /api/:challengeId/activities/:activityId", () => {
     it("returns 200 and the activity select by user", async () => {
-
-
-      const activity: Activities =  {
+      const activity: Activities = {
         user_id: fakeUserId,
         id: 1,
         challenge_id: fakeChallengeId,
@@ -124,47 +127,43 @@ describe("Activities", () => {
         order_num: 1,
       };
 
+      (getActivityById as jest.Mock).mockResolvedValue(activity);
 
+      const response = await request(app)
+        .get(`/api/challenges/${fakeChallengeId}/activities/${fakeActivityId}`)
+        .set("Authorization", "Bearer any-fake-token")
+        .expect(200);
 
-    (getActivityById as jest.Mock).mockResolvedValue(activity);
-  
-
-    const response = await request(app)
-    .get(`/api/${fakeChallengeId}/activities/${fakeActivityId}`)
-    .set("Authorization", "Bearer any-fake-token")
-    .expect(200);
-
-    expect(response.body).toEqual(activity);
-    expect(getActivityById).toHaveBeenCalledWith(
-      expect.any(Object),
-      fakeUserId,
-      fakeChallengeId,
-      fakeActivityId
-    );
-
+      expect(response.body).toEqual(activity);
+      expect(getActivityById).toHaveBeenCalledWith(
+        expect.any(Object),
+        fakeUserId,
+        fakeChallengeId,
+        fakeActivityId
+      );
     });
     it("returns 401 if no token is provided", async () => {
       const response = await request(app)
-        .get(`/api/${fakeChallengeId}/activities/${fakeActivityId}`)
+        .get(`/api/challenges/${fakeChallengeId}/activities/${fakeActivityId}`)
         .expect(401);
 
       expect(response.body.error).toEqual("No token provided");
     });
-    it("returns 404 if challenge id is no provided", async () => {
+    it("returns 400 if challenge id is no provided", async () => {
       const response = await request(app)
-        .get(`/api/activities`)
+        .get(`/api/challenges/activities`)
         .set("Authorization", "Bearer any-fake-token")
-        .expect(404);
+        .expect(400);
     });
     it("returns 404 when activity id is provided without challenge id", async () => {
       const response = await request(app)
-        .get(`/api/activities/${fakeActivityId}`)
+        .get(`/api/challenges/activities/${fakeActivityId}`)
         .set("Authorization", "Bearer any-fake-token")
         .expect(404);
     });
     it("returns 400 when challenge id is invalid", async () => {
       const response = await request(app)
-        .get(`/api/@/activities/${fakeActivityId}`)
+        .get(`/api/challenges/@/activities/${fakeActivityId}`)
         .set("Authorization", "Bearer any-fake-token")
         .expect(400);
 
@@ -172,23 +171,120 @@ describe("Activities", () => {
     });
     it("returns 400 when activity id is invalid", async () => {
       const response = await request(app)
-        .get(`/api/${fakeChallengeId}/activities/abc`)
+        .get(`/api/challenges/${fakeChallengeId}/activities/abc`)
         .set("Authorization", "Bearer any-fake-token")
         .expect(400);
 
       expect(response.body.error).toEqual("Invalid activity id");
-   });
-   it("returns 500 when if an unexpected server error occurs", async () => {
-    (getActivityById as jest.Mock).mockRejectedValue(
-      new Error("Failed to fetch activities")
-    );
+    });
+    it("returns 500 when if an unexpected server error occurs", async () => {
+      (getActivityById as jest.Mock).mockRejectedValue(
+        new Error("Failed to fetch activities")
+      );
 
-    const response = await request(app)
-      .get(`/api/${fakeChallengeId}/activities/${fakeActivityId}`)
-      .set("Authorization", "Bearer any-fake-token")
-      .expect(500);
+      const response = await request(app)
+        .get(`/api/challenges/${fakeChallengeId}/activities/${fakeActivityId}`)
+        .set("Authorization", "Bearer any-fake-token")
+        .expect(500);
 
-    expect(response.body.error).toBe("Failed to fetch activity");
+      expect(response.body.error).toBe("Failed to fetch activity");
+    });
   });
-});
+  describe("POST /api/challenges/:challengeId/activities", () => {
+    const newActivity = {
+      name: "Gym workout",
+      duration_minutes: 60,
+    };
+
+    it("returns 201 and the activity created", async () => {
+      const activity: Activities = {
+        ...newActivity,
+        user_id: fakeUserId,
+        id: fakeActivityId,
+        challenge_id: fakeChallengeId,
+        order_num: 1,
+      };
+
+      (createActivity as jest.Mock).mockResolvedValue(activity);
+
+      const response = await request(app)
+        .post(`/api/challenges/${fakeChallengeId}/activities`)
+        .set("Authorization", "Bearer any-fake-token")
+        .send(newActivity)
+        .expect(201);
+
+      expect(response.body).toEqual(activity);
+      expect(createActivity).toHaveBeenCalledWith(
+        expect.any(Object),
+        fakeUserId,
+        fakeChallengeId,
+        newActivity
+      );
+    });
+    it("returns 401 if no token is provided", async () => {
+      const response = await request(app)
+        .post(`/api/challenges/:challengeId/activities`)
+        .expect(401);
+
+      expect(response.body.error).toEqual("No token provided");
+    });
+    it("returns 400 when activity name exceeds maximum length", async () => {
+      const newActivity = {
+        name: "Gym workout,Gym workout,Gym workout,Gym workout",
+        duration_minutes: 60,
+      };
+
+      const response = await request(app)
+        .post(`/api/challenges/${fakeChallengeId}/activities`)
+        .set("Authorization", "Bearer any-fake-token")
+        .send(newActivity)
+        .expect(400);
+
+      expect(response.body.error).toEqual("Invalid request body");
+    });
+    it("returns 400 when activity duration is less than 1", async () => {
+      const newActivity = {
+        name: "Gym workout",
+        duration_minutes: 0,
+      };
+
+      const response = await request(app)
+        .post(`/api/challenges/${fakeChallengeId}/activities`)
+        .set("Authorization", "Bearer any-fake-token")
+        .send(newActivity)
+        .expect(400);
+
+      expect(response.body.error).toEqual("Invalid request body");
+    });
+
+    it("returns 400 when activity duration exceeds maximum length", async () => {
+      const newActivity = {
+        name: "Gym workout",
+        duration_minutes: 1441,
+      };
+
+      const response = await request(app)
+        .post(`/api/challenges/${fakeChallengeId}/activities`)
+        .set("Authorization", "Bearer any-fake-token")
+        .send(newActivity)
+        .expect(400);
+
+      expect(response.body.error).toEqual("Invalid request body");
+    });
+    it("returns 500 when if an unexpected server error occurs", async () => {
+      (createActivity as jest.Mock).mockRejectedValue(
+        new Error("Failed to create new activity")
+      );
+
+
+
+      const response = await request(app)
+        .post(`/api/challenges/${fakeChallengeId}/activities`)
+        .set("Authorization", "Bearer any-fake-token")
+        .send(newActivity)
+        .expect(500);
+
+      expect(response.body.error).toBe("Failed to create new activity");
+    });
+  });
 });
