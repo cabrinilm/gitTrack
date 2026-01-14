@@ -6,6 +6,7 @@ import {
   updateChallenge,
   deleteChallenge,
   getChallengeById,
+  Challenges,
 } from "../../src/services/challenges.service";
 import { supabase } from "../../src/services/supabaseClient";
 
@@ -261,13 +262,12 @@ describe("Challenges", () => {
         description: "New description",
       };
 
-      const expectedUpdatedChallenge = {
-        id: fakeChallengeId,
+      const expectedUpdatedChallenge: Challenges = {
+        id: Number(fakeChallengeId),
         user_id: fakeUserId,
         name: "Name updated",
         description: "New description",
         created_at: "2026-01-04T15:57:53.336Z",
-        updated_at: "2026-01-04T15:57:53.399Z",
       };
 
       (updateChallenge as jest.Mock).mockResolvedValue(
@@ -383,14 +383,14 @@ describe("Challenges", () => {
         "Description too long",
       ]);
     });
-    it("returns 500 when if an unexpected server error occurs", async () => {
+    it("returns 500 when an unexpected server error occurs", async () => {
       const update = {
         name: "New Challenge",
         description: "Activities",
       };
 
       (updateChallenge as jest.Mock).mockRejectedValue(
-        new Error("Failed to update new challenge")
+        new Error("Failed to update challenge")
       );
 
       const response = await request(app)

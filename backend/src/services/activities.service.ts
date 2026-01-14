@@ -83,3 +83,27 @@ export async function createActivity(
 
   return data;
 }
+
+
+export async function updateActivity(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  challengeId: number,
+  activityId: number,
+  updates: Partial<Activities>
+): Promise<Activities> {
+  const { data, error } = await supabase
+    .from("activities")
+    .update(updates)
+    .eq("user_id", userId)
+    .eq("challenge_id", challengeId)
+    .eq("id", activityId)
+    .select()
+    .single();
+
+  if (error || !data) {
+    throw new Error("Failed to update activity");
+  }
+
+  return data;
+};

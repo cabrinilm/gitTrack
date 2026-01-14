@@ -2,8 +2,8 @@ import type { Activities } from "../../src/services/activities.service";
 import {
   getActivities,
   getActivityById,
-  createActivity
-  
+  createActivity,
+  updateActivity
 } from "../../src/services/activities.service";
 
 describe("Activities", () => {
@@ -185,11 +185,13 @@ describe("Activities", () => {
     });
   });
   describe("POST /api/:challengeId/activities", () => {
-    it.only("returns activity for a valid request", async () => {
-      const newActivity = {
-        name: "Gym workout",
-        duration_minutes: 60,
-      };
+    const newActivity = {
+      name: "Gym workout",
+      duration_minutes: 60,
+    };
+
+    it("returns activity for a valid request", async () => {
+       
 
       const activity: Activities = {
         ...newActivity,
@@ -202,22 +204,22 @@ describe("Activities", () => {
       const mockSupabase = {
         from: jest.fn(),
       };
-      
+
       const mockSelect = jest.fn();
       const mockEq = jest.fn();
       const mockInsert = jest.fn();
       const mockSingle = jest.fn();
-      
+
       //  COUNT QUERY
       mockEq.mockResolvedValueOnce({
         count: 0,
         error: null,
       });
-      
+
       mockSelect.mockReturnValueOnce({
         eq: mockEq,
       });
-      
+
       //  INSERT QUERY
       mockSingle.mockResolvedValueOnce({
         data: {
@@ -229,18 +231,18 @@ describe("Activities", () => {
         },
         error: null,
       });
-      
+
       mockInsert.mockReturnValueOnce({
         select: () => ({
           single: mockSingle,
         }),
       });
-      
+
       mockSupabase.from.mockReturnValue({
         select: mockSelect,
         insert: mockInsert,
       });
-      
+
       const userActivity: Activities = await createActivity(
         mockSupabase as any,
         fakeUserId,
@@ -249,6 +251,122 @@ describe("Activities", () => {
       );
 
       expect(userActivity).toEqual(activity);
+    });
+    it("should throw an error if Supabase returns an error", async () => {
+      const mockSupabase = {
+        from: jest.fn(),
+      };
+
+      const mockSelect = jest.fn();
+      const mockEq = jest.fn();
+      const mockInsert = jest.fn();
+      const mockSingle = jest.fn();
+
+      //  COUNT QUERY
+      mockEq.mockResolvedValueOnce({
+        count: 0,
+        error: null,
+      });
+
+      mockSelect.mockReturnValueOnce({
+        eq: mockEq,
+      });
+
+      //  INSERT QUERY
+      mockSingle.mockResolvedValueOnce({
+        data: null,
+        error: { message: "Failed to create new activity" },
+      });
+
+      mockInsert.mockReturnValueOnce({
+        select: () => ({
+          single: mockSingle,
+        }),
+      });
+
+      mockSupabase.from.mockReturnValue({
+        select: mockSelect,
+        insert: mockInsert,
+      });
+
+      await expect(
+        createActivity(mockSupabase as any, fakeUserId, fakeChallengeId, newActivity)
+      ).rejects.toThrow("Failed to create new activity");
+    });
+  });
+  describe("PATH /api/:challengeId/activities/:activityId", () => {
+
+    const activityUpdate = {
+      name: "Name updated",
+      duration_minutes: 10
+    }
+    it("returns updated activity for a valid request ", async () => {
+
+  
+
+      const expectedUpdatedActivity: Activities = {
+        ...activityUpdate, 
+        id: fakeActivityId,
+        user_id: fakeUserId,
+        challenge_id: fakeChallengeId,
+        order_num: 1
+      };
+
+      const mockSupabase = {
+        from: jest.fn(() => ({
+          update: jest.fn(() => ({
+            eq: jest.fn(() => ({
+              eq: jest.fn(() => ({
+                eq: jest.fn(() => ({
+                  select: jest.fn(() => ({
+                    single: jest.fn(async () => ({
+                      data: expectedUpdatedActivity,
+                      error: null,
+                    })),
+                  })),
+                })),
+              })),
+            })),
+          })),
+        })),
+      };
+  
+      const updatedActivity = await updateActivity(
+        mockSupabase as any,
+        fakeUserId,
+        fakeChallengeId,
+        fakeActivityId,
+        activityUpdate
+      );
+  
+      expect(updatedActivity).toEqual(expectedUpdatedActivity);
+
+
+
+    });
+    it("should throw an error if Supabase returns an error", async () => {
+      const mockSupabase = {
+        from: jest.fn(() => ({
+          update: jest.fn(() => ({
+            eq: jest.fn(() => ({
+              eq: jest.fn(() => ({
+                eq: jest.fn(() => ({
+                  select: jest.fn(() => ({
+                    single: jest.fn(async () => ({
+                      data: null,
+                      error: {message: "Failed to update activity"},
+                    })),
+                  })),
+                })),
+              })),
+            })),
+          })),
+        })),
+      };
+
+      await expect(
+        updateActivity(mockSupabase as any, fakeUserId, fakeChallengeId,fakeActivityId,activityUpdate )
+      ).rejects.toThrow("Failed to update activity");
     });
   });
 });

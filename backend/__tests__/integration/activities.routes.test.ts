@@ -5,6 +5,7 @@ import {
   createActivity,
   getActivities,
   getActivityById,
+  updateActivity,
 } from "../../src/services/activities.service";
 import { supabase } from "../../src/services/supabaseClient";
 
@@ -276,8 +277,6 @@ describe("Activities", () => {
         new Error("Failed to create new activity")
       );
 
-
-
       const response = await request(app)
         .post(`/api/challenges/${fakeChallengeId}/activities`)
         .set("Authorization", "Bearer any-fake-token")
@@ -285,6 +284,137 @@ describe("Activities", () => {
         .expect(500);
 
       expect(response.body.error).toBe("Failed to create new activity");
+    });
+  });
+  describe("PATCH /api/challenges/:challengeId/activities/:activityId", () => {
+    const update = {
+      name: "Gym workout",
+      duration_minutes: 60,
+    };
+    it("returns 200 and the updated activity when update is successful", async () => {
+      const expectedUpdatedActivity: Activities = {
+        ...update,
+        id: fakeActivityId,
+        user_id: fakeUserId,
+        challenge_id: fakeChallengeId,
+        order_num: 1,
+      };
+
+      (updateActivity as jest.Mock).mockResolvedValue(expectedUpdatedActivity);
+
+      const response = await request(app)
+        .patch(
+          `/api/challenges/${fakeChallengeId}/activities/${fakeActivityId}`
+        )
+        .set("Authorization", "Bearer any-fake-token")
+        .send(update)
+        .expect(200);
+
+      expect(response.body).toEqual(expectedUpdatedActivity);
+      expect(updateActivity).toHaveBeenCalledWith(
+        expect.anything(),
+        fakeUserId,
+        Number(fakeChallengeId),
+        fakeActivityId,
+        update
+      );
+    });
+    it("returns 401 if no token is provided", async () => {
+      const response = await request(app)
+        .patch(
+          `/api/challenges/${fakeChallengeId}/activities/${fakeActivityId}`
+        )
+        .expect(401);
+
+      expect(response.body.error).toEqual("No token provided");
+    });
+    it("returns 404 if challenge id is no provided", async () => {
+      const response = await request(app)
+        .patch(`/api/challenges/activities/${fakeActivityId}`)
+        .set("Authorization", "Bearer any-fake-token")
+        .send(update)
+        .expect(404);
+    });
+    it("returns 404 if activity id is no provided", async () => {
+      const response = await request(app)
+        .patch(`/api/challenges/${fakeChallengeId}/activities/`)
+        .set("Authorization", "Bearer any-fake-token")
+        .send(update)
+        .expect(404);
+    });
+    it("returns 400 if activity id is invalid", async () => {
+      const response = await request(app)
+        .patch(`/api/challenges/${fakeChallengeId}/activities/abc`)
+        .set("Authorization", "Bearer any-fake-token")
+        .send(update)
+        .expect(400);
+    });
+    it("returns 400 if challenge id is invalid", async () => {
+      const response = await request(app)
+        .patch(`/api/challenges/a1/activities/${fakeActivityId}`)
+        .set("Authorization", "Bearer any-fake-token")
+        .send(update)
+        .expect(400);
+    });
+    it("returns 400 when activity name exceeds maximum length", async () => {
+      const newActivity = {
+        name: "Gym workout,Gym workout,Gym workout,Gym workout",
+        duration_minutes: 60,
+      };
+
+      const response = await request(app)
+        .patch(
+          `/api/challenges/${fakeChallengeId}/activities/${fakeActivityId}`
+        )
+        .set("Authorization", "Bearer any-fake-token")
+        .send(newActivity)
+        .expect(400);
+
+      expect(response.body.error).toEqual("Invalid request body");
+    });
+    it("returns 400 when activity duration is less than 1", async () => {
+      const newActivity = {
+        name: "Gym workout",
+        duration_minutes: 0,
+      };
+
+      const response = await request(app)
+        .patch(
+          `/api/challenges/${fakeChallengeId}/activities/${fakeActivityId}`
+        )
+        .set("Authorization", "Bearer any-fake-token")
+        .send(newActivity)
+        .expect(400);
+
+      expect(response.body.error).toEqual("Invalid request body");
+    });
+    it("returns 400 when activity duration exceeds maximum length", async () => {
+      const newActivity = {
+        name: "Gym workout",
+        duration_minutes: 1441,
+      };
+
+      const response = await request(app)
+        .patch(`/api/challenges/${fakeChallengeId}/activities/${fakeActivityId}`)
+        .set("Authorization", "Bearer any-fake-token")
+        .send(newActivity)
+        .expect(400);
+
+      expect(response.body.error).toEqual("Invalid request body");
+    });
+    it("returns 500 when an unexpected server error occurs", async () => {
+      (updateActivity as jest.Mock).mockRejectedValue(
+        new Error("Failed to update activity")
+      );
+
+      const response = await request(app)
+      .patch(`/api/challenges/${fakeChallengeId}/activities/${fakeActivityId}`)
+        .set("Authorization", "Bearer any-fake-token")
+        .send(update)
+        .expect(500);
+      
+        expect(response.body.error).toBe("Failed to update activity");
+
     });
   });
 });
