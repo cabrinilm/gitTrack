@@ -3,7 +3,8 @@ import {
   getActivities,
   getActivityById,
   createActivity,
-  updateActivity
+  updateActivity,
+  deleteActivity
 } from "../../src/services/activities.service";
 
 describe("Activities", () => {
@@ -191,8 +192,6 @@ describe("Activities", () => {
     };
 
     it("returns activity for a valid request", async () => {
-       
-
       const activity: Activities = {
         ...newActivity,
         user_id: fakeUserId,
@@ -290,26 +289,27 @@ describe("Activities", () => {
       });
 
       await expect(
-        createActivity(mockSupabase as any, fakeUserId, fakeChallengeId, newActivity)
+        createActivity(
+          mockSupabase as any,
+          fakeUserId,
+          fakeChallengeId,
+          newActivity
+        )
       ).rejects.toThrow("Failed to create new activity");
     });
   });
   describe("PATH /api/:challengeId/activities/:activityId", () => {
-
     const activityUpdate = {
       name: "Name updated",
-      duration_minutes: 10
-    }
+      duration_minutes: 10,
+    };
     it("returns updated activity for a valid request ", async () => {
-
-  
-
       const expectedUpdatedActivity: Activities = {
-        ...activityUpdate, 
+        ...activityUpdate,
         id: fakeActivityId,
         user_id: fakeUserId,
         challenge_id: fakeChallengeId,
-        order_num: 1
+        order_num: 1,
       };
 
       const mockSupabase = {
@@ -330,7 +330,7 @@ describe("Activities", () => {
           })),
         })),
       };
-  
+
       const updatedActivity = await updateActivity(
         mockSupabase as any,
         fakeUserId,
@@ -338,11 +338,8 @@ describe("Activities", () => {
         fakeActivityId,
         activityUpdate
       );
-  
+
       expect(updatedActivity).toEqual(expectedUpdatedActivity);
-
-
-
     });
     it("should throw an error if Supabase returns an error", async () => {
       const mockSupabase = {
@@ -354,7 +351,7 @@ describe("Activities", () => {
                   select: jest.fn(() => ({
                     single: jest.fn(async () => ({
                       data: null,
-                      error: {message: "Failed to update activity"},
+                      error: { message: "Failed to update activity" },
                     })),
                   })),
                 })),
@@ -365,8 +362,76 @@ describe("Activities", () => {
       };
 
       await expect(
-        updateActivity(mockSupabase as any, fakeUserId, fakeChallengeId,fakeActivityId,activityUpdate )
+        updateActivity(
+          mockSupabase as any,
+          fakeUserId,
+          fakeChallengeId,
+          fakeActivityId,
+          activityUpdate
+        )
       ).rejects.toThrow("Failed to update activity");
+    });
+  });
+  describe("DELETE /api/challenges/:challengeId/activities/:activityId", () => {
+    it("returns the deleted activity for a valid request", async () => {
+      const expectedDeletedActivity: Activities = {
+        id: fakeActivityId,
+        user_id: fakeUserId,
+        challenge_id: fakeChallengeId,
+        name: "Name updated",
+        duration_minutes: 10,
+        order_num: 1,
+      };
+
+      const mockSupabase = {
+        from: jest.fn().mockReturnValue({
+          delete: jest.fn().mockReturnValue({
+            eq: jest.fn().mockReturnThis(),
+            select: jest.fn().mockReturnValue({
+              single: jest.fn().mockResolvedValue({
+                data: expectedDeletedActivity,
+                error: null,
+              }),
+            }),
+          }),
+        }),
+      };
+
+      const result = await deleteActivity(
+        mockSupabase as any,
+        fakeUserId,
+        fakeChallengeId,
+        fakeActivityId
+      );
+
+      expect(result).toEqual(expectedDeletedActivity);
+      expect(mockSupabase.from).toHaveBeenCalledWith("activities");
+      expect(mockSupabase.from().delete).toHaveBeenCalled();
+      expect(mockSupabase.from().delete().eq).toHaveBeenCalledTimes(3);
+    });
+    it("should throw an error if Supabase returns an error", async () => {
+      const mockSupabase = {
+        from: jest.fn().mockReturnValue({
+          delete: jest.fn().mockReturnValue({
+            eq: jest.fn().mockReturnThis(),
+            select: jest.fn().mockReturnValue({
+              single: jest.fn().mockResolvedValue({
+                data: null,
+                error: {error: "Failed to delete activity"},
+              }),
+            }),
+          }),
+        }),
+      };
+
+      await expect(
+        deleteActivity(
+          mockSupabase as any,
+          fakeUserId,
+          fakeChallengeId,
+          fakeActivityId,
+        )
+      ).rejects.toThrow("Failed to delete activity");
     });
   });
 });

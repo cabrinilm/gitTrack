@@ -107,3 +107,32 @@ export async function updateActivity(
 
   return data;
 };
+
+
+export async function deleteActivity(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  challengeId: number,
+  activityId: number  
+): Promise<Activities> {
+  const { data, error } = await supabase
+    .from("activities")
+    .delete()
+    .eq("id", activityId)         
+    .eq("challenge_id", challengeId)
+    .eq("user_id", userId)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Supabase error deleting activity:", error);
+    throw new Error("Failed to delete activity");
+  }
+
+  if (!data) {
+    console.error(`Activity not found: id=${activityId}, challenge=${challengeId}, user=${userId}`);
+    throw new Error("Activity not found or does not belong to you");
+  }
+
+  return data;
+}

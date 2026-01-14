@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import { z } from "zod";
 import {
   createActivity,
+  deleteActivity,
   getActivities,
   getActivityById,
   updateActivity,
@@ -178,7 +179,7 @@ export const updateMyActivity = async (
     }
 
     if (Number.isNaN(activityId)) {
-      res.status(400).json({ error: "Invalid challenge id" });
+      res.status(400).json({ error: "Invalid activity id" });
       return;
     }
 
@@ -195,3 +196,47 @@ export const updateMyActivity = async (
     res.status(500).json({ error: "Failed to update activity" });
   }
 };
+
+
+export const deleteMyActivity = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const supabase = req.supabase;
+    const userId = req.user?.id;
+    const challengeId = Number(req.params.challengeId);
+    const activityId = Number(req.params.activityId);
+    
+    if (!supabase) {
+      res.status(500).json({ error: "Supabase client not found in request" });
+      return;
+    }
+
+    if (!userId) {
+      res.status(401).json({ error: "Unauthorized: No user ID found" });
+      return;
+    }
+    if (Number.isNaN(challengeId)) {
+      res.status(400).json({ error: "Invalid challenge id" });
+      return;
+    }
+
+    if (Number.isNaN(activityId)) {
+      res.status(400).json({ error: "Invalid activity id" });
+      return;
+    }
+
+    const deletedActivity = await deleteActivity(
+      supabase,
+      userId,
+      challengeId,
+      activityId
+    );
+
+    res.status(200).json(deletedActivity);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to delete activity" });
+  }
+};
+

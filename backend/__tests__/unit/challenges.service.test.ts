@@ -259,7 +259,7 @@ describe("Challenges", () => {
       expect(updated).toEqual(expectedUpdatedChallenge);
     });
     it("should throw an error if Supabase returns an error", async () => {
-      const fakeChallengeId = 2;
+     
       const updates = {
         name: "Name updated",
         description: "New description",
@@ -295,7 +295,7 @@ describe("Challenges", () => {
 
   describe("DELETE  /api/challenges/:challengeId", () => {
     it("should return the deleted challenge data", async () => {
-      const fakeChallengeId = 2;
+     
 
       const deletedChallengeData = {
         id: fakeChallengeId,

@@ -3,6 +3,7 @@ import app from "../../src/server";
 import {
   Activities,
   createActivity,
+  deleteActivity,
   getActivities,
   getActivityById,
   updateActivity,
@@ -395,7 +396,9 @@ describe("Activities", () => {
       };
 
       const response = await request(app)
-        .patch(`/api/challenges/${fakeChallengeId}/activities/${fakeActivityId}`)
+        .patch(
+          `/api/challenges/${fakeChallengeId}/activities/${fakeActivityId}`
+        )
         .set("Authorization", "Bearer any-fake-token")
         .send(newActivity)
         .expect(400);
@@ -408,13 +411,62 @@ describe("Activities", () => {
       );
 
       const response = await request(app)
-      .patch(`/api/challenges/${fakeChallengeId}/activities/${fakeActivityId}`)
+        .patch(
+          `/api/challenges/${fakeChallengeId}/activities/${fakeActivityId}`
+        )
         .set("Authorization", "Bearer any-fake-token")
         .send(update)
         .expect(500);
-      
-        expect(response.body.error).toBe("Failed to update activity");
 
+      expect(response.body.error).toBe("Failed to update activity");
     });
   });
+  describe("DELETE /api/challenges/:challengeId/activities/:activityId", () => {
+    it("returns 200 and the deleted challenge", async () => {
+      const expectedDeletedActivity: Activities = {
+        id: fakeActivityId,
+        user_id: fakeUserId,
+        challenge_id: fakeChallengeId,
+        name: "Name updated",
+        duration_minutes: 10,
+        order_num: 1,
+      };
+
+      (deleteActivity as jest.Mock).mockResolvedValue(expectedDeletedActivity);
+
+      const response = await request(app)
+        .delete(
+          `/api/challenges/${fakeChallengeId}/activities/${fakeActivityId}`
+        )
+        .set("Authorization", "Bearer any-fake-token")
+        .expect(200);
+
+      expect(response.body).toEqual(expectedDeletedActivity);
+      expect(deleteActivity).toHaveBeenCalledWith(
+        expect.any(Object),
+        fakeUserId,
+        fakeChallengeId,
+        fakeActivityId
+      );
+    });
+    it("returns 401 if no token is provided", async () => {
+      const response = await request(app)
+        .delete(`/api/challenges/${fakeChallengeId}/activities/${fakeActivityId}`)
+        .expect(401);
+
+      expect(response.body.error).toEqual("No token provided");
+  });
+  it("returns 500 when if an unexpected server error occurs", async () => {
+    (deleteActivity as jest.Mock).mockRejectedValue(
+      new Error("Failed to delete activity")
+    );
+
+    const response = await request(app)
+      .delete(`/api/challenges/${fakeChallengeId}/activities/${fakeActivityId}`)
+      .set("Authorization", "Bearer any-fake-token")
+      .expect(500);
+
+    expect(response.body.error).toBe("Failed to delete activity");
+  });
+});
 });
