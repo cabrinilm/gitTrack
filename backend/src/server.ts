@@ -31,7 +31,7 @@ app.get("/api/challenges/:challengeId/activities", getMyActivities);
 app.get("/api/challenges/:challengeId/activities/:activityId", getMyActivityById);
 app.post("/api/challenges/:challengeId/activities", createMyActivity);
 app.patch("/api/challenges/:challengeId/activities/:activityId", updateMyActivity);
-app.delete("/api/challenges/:challengeId/activities/:activityId", deleteMyActivity)
+app.delete("/api/challenges/:challengeId/activities/:activityId", deleteMyActivity);
 
 
 
