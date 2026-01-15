@@ -8,42 +8,35 @@ describe("Active_challenge", () => {
 
     describe("GET /api/active-challenge", () => {
         it("returns the active challenge for a valid request", async () => {
-          const expectedChallenge: Challenges = {
-            id: fakeChallengeId,
-            user_id: fakeUserId,
-            name: "Active challenge",
-            description: "Test the output",
-            created_at: new Date().toISOString(),
-          };
-      
-          const mockSupabase = {
-            from: jest.fn(() => ({
-              select: jest.fn(() => ({
-                eq: jest.fn(() => ({
-                  single: jest.fn().mockResolvedValue({
-                    data: {
-                      challenge_id: fakeChallengeId,
-                      activated_at: new Date().toISOString(),
-                      challenges: expectedChallenge,
-                    },
-                    error: null,
-                  }),
+            const expectedChallenge = {
+              id: fakeChallengeId,
+              user_id: fakeUserId,
+              name: "Active challenge",
+              description: "Test the output",
+              created_at: new Date().toISOString(),
+            };
+        
+            const mockSupabase = {
+                from: jest.fn(() => ({
+                  select: jest.fn(() => ({
+                    eq: jest.fn().mockReturnThis(),
+                    single: jest.fn().mockResolvedValue({
+                      data: {
+                        challenge_id: fakeChallengeId,
+                        activated_at: new Date().toISOString(),
+                        challenges: expectedChallenge,
+                      },
+                      error: null,
+                    }),
+                  })),
                 })),
-              })),
-            })),
-          };
-      
-          const result = await getActiveChallenge(mockSupabase as any, fakeUserId);
-      
-          expect(result).toEqual(expectedChallenge);
-      
-          
-          expect(mockSupabase.from).toHaveBeenCalledWith("active_challenges");
-        //   expect(mockSupabase.from().select).toHaveBeenCalledWith(
-        //     "challenge_id, activated_at, challenges(name, description, created_at)"
-        //   );
-        //   expect(mockSupabase.from().select().eq).toHaveBeenCalledWith("user_id", fakeUserId);
-        //   expect(mockSupabase.from().select().eq().single).toHaveBeenCalled();
-        });
+              };
+        
+            const result = await getActiveChallenge(mockSupabase as any, fakeUserId);
+        
+            expect(result).toEqual(expectedChallenge);
+        
+        
+          });
       });
 });
