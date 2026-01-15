@@ -451,22 +451,26 @@ describe("Activities", () => {
     });
     it("returns 401 if no token is provided", async () => {
       const response = await request(app)
-        .delete(`/api/challenges/${fakeChallengeId}/activities/${fakeActivityId}`)
+        .delete(
+          `/api/challenges/${fakeChallengeId}/activities/${fakeActivityId}`
+        )
         .expect(401);
 
       expect(response.body.error).toEqual("No token provided");
-  });
-  it("returns 500 when if an unexpected server error occurs", async () => {
-    (deleteActivity as jest.Mock).mockRejectedValue(
-      new Error("Failed to delete activity")
-    );
+    });
+    it("returns 500 if an unexpected server error occurs", async () => {
+      (deleteActivity as jest.Mock).mockRejectedValue(
+        new Error("Failed to delete activity")
+      );
 
-    const response = await request(app)
-      .delete(`/api/challenges/${fakeChallengeId}/activities/${fakeActivityId}`)
-      .set("Authorization", "Bearer any-fake-token")
-      .expect(500);
+      const response = await request(app)
+        .delete(
+          `/api/challenges/${fakeChallengeId}/activities/${fakeActivityId}`
+        )
+        .set("Authorization", "Bearer any-fake-token")
+        .expect(500);
 
-    expect(response.body.error).toBe("Failed to delete activity");
+      expect(response.body.error).toBe("Failed to delete activity");
+    });
   });
-});
 });
