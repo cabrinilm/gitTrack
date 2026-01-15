@@ -5,7 +5,7 @@ import { getMyProfile, updateMyProfile } from './controllers/profile.controller'
 import { authMiddleware } from './middleware/auth';
 import { createMyChallenge, deleteMyChallenge, getMyChallengeById, getMyChallenges, updateMyChallenge } from "./controllers/challenges.controller";
 import { createMyActivity, deleteMyActivity, getMyActivities, getMyActivityById, updateMyActivity } from "./controllers/activities.controller";
-import { getMyActiveChallenge } from "./controllers/active_challenge.controller";
+import { activateMyChallenge, getMyActiveChallenge } from "./controllers/active_challenge.controller";
 
 
 dotenv.config();
@@ -35,7 +35,8 @@ app.patch("/api/challenges/:challengeId/activities/:activityId", updateMyActivit
 app.delete("/api/challenges/:challengeId/activities/:activityId", deleteMyActivity);
 
 
-app.get("/api/active-challenge", getMyActiveChallenge)
+app.get("/api/active-challenge", getMyActiveChallenge);
+app.post("/api/challenges/:challengeId/activate", activateMyChallenge);
 
 
 export default app; 

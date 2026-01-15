@@ -1,7 +1,7 @@
 import request from "supertest";
 import app from "../../src/server";
 import { supabase } from "../../src/services/supabaseClient";
-import { getActiveChallenge } from "../../src/services/active_challenge.service";
+import { activateChallenge, Active_Challenge, getActiveChallenge } from "../../src/services/active_challenge.service";
 
 jest.mock("../../src/services/active_challenge.service");
 jest.mock("../../src/services/supabaseClient");
@@ -71,6 +71,66 @@ describe("Active_challenge", () => {
       .expect(500);
 
       expect(response.body.error).toBe("Failed to fetch active challenge");
+    });
+  });
+  describe("POST /api/challenges/:challengeId/activate", () => {
+    it("returns 201 and the activated challenge", async () => {
+      const activeChallenge: Active_Challenge = {
+        user_id: fakeUserId,
+        challenge_id: fakeChallengeId,
+        activated_at: new Date().toISOString(),
+      };
+    
+      (activateChallenge as jest.Mock).mockResolvedValue(activeChallenge);
+  
+      const response = await request(app)
+        .post(`/api/challenges/${fakeChallengeId}/activate`)
+        .set("Authorization", "Bearer any-fake-token")
+        .expect(201);
+  
+      expect(response.body).toEqual(activeChallenge);
+  
+      expect(activateChallenge).toHaveBeenCalledWith(
+        expect.anything(), 
+        fakeUserId,
+        fakeChallengeId
+      );
+    });
+    it("returns 401 if no token is provided", async () => {
+      const response = await request(app)
+      .post(`/api/challenges/${fakeChallengeId}/activate`)
+      .expect(401);
+
+      expect(response.body.error).toEqual("No token provided");
+    });
+    it("returns 400 if challenge id is no provided", async () => {
+      const response = await request(app)
+        .patch(`/api/challenges/activate`)
+        .set("Authorization", "Bearer any-fake-token")
+        .expect(400);
+      
+    });
+
+    it("returns 404 if activity id is invalid", async () => {
+      const response = await request(app)
+        .patch(`/api/challenges/abc/activate`)
+        .set("Authorization", "Bearer any-fake-token")
+        .expect(404);
+
+    });
+    it("returns 500 if an unexpected server error occurs", async () => {
+      (activateChallenge as jest.Mock).mockRejectedValue(
+        new Error("Failed to delete activity")
+      );
+
+      const response = await request(app)
+        .post(
+          `/api/challenges/${fakeChallengeId}/activate`
+        )
+        .set("Authorization", "Bearer any-fake-token")
+        .expect(500);
+
+      expect(response.body.error).toBe("Failed to update activate challenge");
     });
   });
 });
