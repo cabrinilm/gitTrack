@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../types/supabase";
 import { Challenges } from "./challenges.service";
+import { supabase } from "./supabaseClient";
 export type Active_Challenge =
   Database["public"]["Tables"]["active_challenges"]["Row"];
 
@@ -57,6 +58,30 @@ export type Active_Challenge =
     if (error) {
       console.error("Error activating challenge:", error);
       throw new Error("Failed to activate challenge");
+    }
+  
+    return data;
+  };
+
+  export async function deleteActiveChallenge(
+    supabase: SupabaseClient<Database>,
+    userId: string
+  ): Promise<Active_Challenge | null> {
+    const { data, error } = await supabase
+      .from("active_challenges")
+      .delete()
+      .eq("user_id", userId)
+      .select()
+      .maybeSingle();
+  
+    if (error) {
+      console.error("Supabase error deactivating active challenge for user:", userId, error);
+      throw new Error("Failed to deactivate active challenge");
+    }
+  
+    if (!data) {
+      console.warn("No active challenge found to deactivate for user:", userId);
+      return null; 
     }
   
     return data;

@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
-import { z } from "zod";
 import {
   activateChallenge,
+  deleteActiveChallenge,
   getActiveChallenge,
 } from "../services/active_challenge.service";
 
@@ -62,5 +62,43 @@ export const activateMyChallenge = async (
   } catch (error) {
     console.error("Error activating challenge :", error);
     res.status(500).json({ error: "Failed to update activate challenge" });
+  }
+};
+
+
+
+export const deleteMyActiveChallenge = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const supabase = req.supabase;
+    const userId = req.user?.id;
+
+    if (!supabase) {
+      res.status(500).json({ error: "Supabase client not found in request" });
+      return;
+    }
+
+    if (!userId) {
+      res.status(401).json({ error: "Unauthorized: No user ID found" });
+      return;
+    }
+
+    const deleted = await deleteActiveChallenge(supabase, userId);
+
+    if (!deleted) {
+      res.status(404).json({ error: "No active challenge found" });
+      return;
+    }
+
+    res.status(204).send();
+  } catch (error) {
+    console.error(
+      "Error deleting active challenge for user:",
+      req.user?.id,
+      error
+    );
+    res.status(500).json({ error: "Failed to delete active challenge" });
   }
 };
