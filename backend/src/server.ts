@@ -41,7 +41,7 @@ app.post("/api/challenges/:challengeId/activate", activateMyChallenge);
 app.delete("/api/activate-challenge", deleteMyActiveChallenge);
 
 
-app.post("/api/fulfillments/:activityId", postMyFulfillActivity);
+app.post("/api/fulfillments", postMyFulfillActivity);
 
 
 

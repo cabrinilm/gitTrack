@@ -6,37 +6,33 @@ import { postFulfillActivity } from "../services/fulfillments.service";
 export const postMyFulfillActivity = async (
     req: Request,
     res: Response
-): Promise<void> => {
-
+  ): Promise<void> => {
     try {
-        const supabase = req.supabase;
-        const userId = req.user?.id;
-        const activityId = Number(req.params.activityId);
-
-
-
-    if (!supabase) {
+      const supabase = req.supabase;
+      const userId = req.user?.id;
+      const activityId = Number(req.body.activityId);
+  
+      if (!supabase) {
         res.status(500).json({ error: "Supabase client not found in request" });
         return;
       }
   
       if (!userId) {
-        res.status(401).json({ error: "Unauthorized: No user ID found" });
+        res.status(401).json({ error: "Unauthorized" });
         return;
       }
   
-      if (Number.isNaN(activityId)) {
-        res.status(400).json({ error: "Invalid challenge id" });
+      if (!Number.isInteger(activityId) || activityId <= 0) {
+        res.status(400).json({ error: "activityId must be a positive integer" });
         return;
       }
-
-      const createFulfill = await postFulfillActivity(supabase, userId, activityId);
-
-      res.status(200).json(createFulfill);
-    } catch (error){
-        res.status(500).json({error: "Failed to fulfill activity"})
+  
+      const fulfill = await postFulfillActivity(supabase, userId, activityId);
+  
+      res.status(201).json(fulfill);
+    } catch (error: any) {
+      res.status(400).json({
+        error: error.message || "Failed to fulfill activity",
+      });
     }
-
-
-
-}
+  };
