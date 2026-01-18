@@ -1,19 +1,21 @@
-import { postFulfillActivity } from "../../src/services/fulfillments.service";
+import { Fulfillments, postFulfillActivity } from "../../src/services/fulfillments.service";
 
 describe("Fulfillments Service", () => {
-  describe("fulfillActivity", () => {
     const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
     const fakeActivityId = 4;
     const fakeFulfillmentsId = 1;
     const fakeProgressEntryId = 3;
-
+   
     const newActivity = {
-      name: "Gym workout",
-      duration_minutes: 60,
-    };
+        name: "Gym workout",
+        duration_minutes: 60,
+      };
+    
+  describe("POST /api/fulfillments", () => {
+ 
 
     it("returns the fulfillment object for a valid request", async () => {
-      // Mock do Supabase
+
       const mockSupabase = {
         from: jest.fn((table: string) => {
           if (table === "activities") {
@@ -78,7 +80,7 @@ describe("Fulfillments Service", () => {
         progressEntryId: fakeProgressEntryId,
       });
 
-      // Checa se a RPC e inserts foram chamados
+ 
       expect(mockSupabase.rpc).toHaveBeenCalledWith(
         "get_or_create_progress_entry",
         {
@@ -91,4 +93,52 @@ describe("Fulfillments Service", () => {
       expect(mockSupabase.from).toHaveBeenCalledWith("daily_activity_fulfillments");
     });
   });
+  describe("GET /api/:date/fulfillments",  () => {
+    it("returns the fulfillment at the specific date for a valid request", async () => {
+      const fakeFulfillment: Fulfillments[] = [{
+        id: fakeFulfillmentsId,
+        progress_entry_id: fakeProgressEntryId,
+        activity_id: fakeActivityId,
+        activity_name: newActivity.name,
+        planned_duration_minutes: newActivity.duration_minutes,
+        fulfilled_at: expect.any(String),
+      }];
+
+      const fakeDate = "2025-03-20";
+
+     
+        const mockEq2 = jest.fn().mockResolvedValue({
+            data: fakeFulfillment,
+            error: null,
+          });
+          
+          const mockEq1 = jest.fn().mockReturnValue({
+            eq: mockEq2,
+          });
+          
+          const mockSelect = jest.fn().mockReturnValue({
+            eq: mockEq1,
+          });
+          
+          const mockSupabase = {
+            from: jest.fn().mockReturnValue({
+              select: mockSelect,
+            }),
+          };
+
+          const result = await getFulfillmentsByDate(mockSupabase as any, fakeUserId, fakeDate)
+       
+          expect(result).toEqual(fakeFulfillment)
+          expect(mockSupabase.from).toHaveBeenCalledWith(
+            "daily_activity_fulfillments"
+          );
+          
+          expect(mockSelect).toHaveBeenCalled();
+          
+          expect(mockEq1).toHaveBeenCalledWith("user_id", fakeUserId);
+          
+          expect(mockEq2).toHaveBeenCalledWith("entry_date", fakeDate);
+
+    });
+  })
 });

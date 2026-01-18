@@ -1,6 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../types/supabase";
-
+export type Fulfillments = Database["public"]["Tables"]["daily_activity_fulfillments"]["Row"];
 export async function postFulfillActivity(
   supabase: SupabaseClient<Database>,
   userId: string,
@@ -63,4 +63,19 @@ export async function postFulfillActivity(
     fulfillment,
     progressEntryId,
   };
+};
+
+export async function getFulfillmentsByDate(
+    supabase: SupabaseClient<Database>,
+    fulfilledAt: string 
+): Fulfillments[] {
+
+const { data, error} = await supabase
+.from("active_challenges")
+.select("*")
+.eq("fulfilled_at", fulfilledAt)
+
+
+
+
 }
