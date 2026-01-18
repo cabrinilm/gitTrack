@@ -31,8 +31,8 @@ export const postMyFulfillActivity = async (
   
       res.status(201).json(fulfill);
     } catch (error: any) {
-      res.status(400).json({
-        error: error.message || "Failed to fulfill activity",
+      res.status(500).json({
+      error : "Failed to fulfill activity",
       });
     }
   };

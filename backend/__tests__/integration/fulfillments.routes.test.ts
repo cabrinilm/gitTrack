@@ -60,5 +60,69 @@ describe("Fulfillments", () => {
         progressEntryId: fakeProgressEntryId,
       });
     });
+    it("returns 401 if no token is provided", async () => {
+      const response = await request(app)
+        .get("/api/active-challenge")
+        .expect(401);
+
+      expect(response.body.error).toEqual("No token provided");
+    });
+    it("returns 400 if no activity id is provided", async () => {
+      const response = await request(app)
+        .post(`/api/fulfillments`)
+        .set("Authorization", "Bearer any-fake-token")
+        .send({ activityId: null })
+        .expect(400);
+
+      expect(response.body.error).toEqual(
+        "activityId must be a positive integer"
+      );
+    });
+    it("returns 400 if  activity id is a negative number", async () => {
+      const response = await request(app)
+        .post(`/api/fulfillments`)
+        .set("Authorization", "Bearer any-fake-token")
+        .send({ activityId: -1 })
+        .expect(400);
+
+      expect(response.body.error).toEqual(
+        "activityId must be a positive integer"
+      );
+    });
+    it("returns 400 if  activity id is zero", async () => {
+      const response = await request(app)
+        .post(`/api/fulfillments`)
+        .set("Authorization", "Bearer any-fake-token")
+        .send({ activityId: 0 })
+        .expect(400);
+
+      expect(response.body.error).toEqual(
+        "activityId must be a positive integer"
+      );
+    });
+    it("returns 400 if  activity id is a string", async () => {
+      const response = await request(app)
+        .post(`/api/fulfillments`)
+        .set("Authorization", "Bearer any-fake-token")
+        .send({ activityId: "abc" })
+        .expect(400);
+
+      expect(response.body.error).toEqual(
+        "activityId must be a positive integer"
+      );
+    });
+    it("returns 500 if an unexpected server error occurs", async () => {
+      (postFulfillActivity as jest.Mock).mockRejectedValue(
+        new Error("Failed to fulfill activity")
+      );
+
+      const response = await request(app)
+        .post(`/api/fulfillments`)
+        .set("Authorization", "Bearer any-fake-token")
+        .send({ activityId: fakeActivityId })
+        .expect(500);
+
+      expect(response.body.error).toBe("Failed to fulfill activity");
+    });
   });
 });
