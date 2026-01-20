@@ -67,32 +67,29 @@ export async function postFulfillActivity(
 
 export async function getFulfillmentsByDate(
     supabase: SupabaseClient<Database>,
-    date: string, 
-    userId: string
+    userId: string,
+    date: string 
   ): Promise<Fulfillments[]> {
-  
-  
-
+   
     const { data: progressEntry, error: entryError } = await supabase
       .from("progress_entries")
       .select("id")
       .eq("user_id", userId)
       .eq("entry_date", date)
-      .single();
+      .single()
   
-    if (entryError && entryError.code !== 'PGRST116') { 
+    if (entryError) {
       console.error("Error fetching progress entry:", entryError);
-      throw new Error("Failed to fetch progress entry");
-    }
+      throw new Error("Failed to fetch progress entry for the date");
+    };
   
     if (!progressEntry) {
-
       return [];
-    }
+    };
   
     const progressEntryId = progressEntry.id;
   
-
+   
     const { data: fulfillments, error: fulfillError } = await supabase
       .from("daily_activity_fulfillments")
       .select("*")
@@ -102,8 +99,7 @@ export async function getFulfillmentsByDate(
     if (fulfillError) {
       console.error("Error fetching fulfillments:", fulfillError);
       throw new Error("Failed to fetch fulfillments for the date");
-    }
+    };
   
     return fulfillments ?? [];
-
-}
+  };

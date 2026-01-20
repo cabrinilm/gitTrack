@@ -21,16 +21,16 @@ export const getMyActivities = async (
     if (!supabase) {
       res.status(500).json({ error: "Supabase client not found in request" });
       return;
-    }
+    };
 
     if (!userId) {
       res.status(401).json({ error: "Unauthorized: No user ID found" });
       return;
-    }
+    };
     if (Number.isNaN(challengeId)) {
       res.status(400).json({ error: "Invalid challenge id" });
       return;
-    }
+    };
 
     const activities = await getActivities(supabase, userId, challengeId);
 
@@ -38,7 +38,7 @@ export const getMyActivities = async (
   } catch (error) {
     console.error("Error fetching activitie :", error);
     res.status(500).json({ error: "Failed to fetch activities" });
-  }
+  };
 };
 
 export const getMyActivityById = async (
@@ -54,20 +54,20 @@ export const getMyActivityById = async (
     if (!supabase) {
       res.status(500).json({ error: "Supabase client not found in request" });
       return;
-    }
+    };
 
     if (!userId) {
       res.status(401).json({ error: "Unauthorized: No user ID found" });
       return;
-    }
+    };
     if (Number.isNaN(challengeId)) {
       res.status(400).json({ error: "Invalid challenge id" });
       return;
-    }
+    };
     if (Number.isNaN(activityId)) {
       res.status(400).json({ error: "Invalid activity id" });
       return;
-    }
+    };
 
     const activity = await getActivityById(
       supabase,
@@ -80,7 +80,7 @@ export const getMyActivityById = async (
   } catch (error) {
     console.error("Error fetching activity:", error);
     res.status(500).json({ error: "Failed to fetch activity" });
-  }
+  };
 };
 
 export const createMyActivity = async (
@@ -100,22 +100,22 @@ export const createMyActivity = async (
         details: z.treeifyError(parsed.error),
       });
       return;
-    }
+    };
 
     if (!supabase) {
       res.status(500).json({ error: "Supabase client not found in request" });
       return;
-    }
+    };
 
     if (!userId) {
       res.status(401).json({ error: "Unauthorized: No user ID found" });
       return;
-    }
+    };
 
     if (Number.isNaN(challengeId)) {
       res.status(400).json({ error: "Invalid challenge id" });
       return;
-    }
+    };
 
     const createdActivity = await createActivity(
       supabase,
@@ -137,10 +137,10 @@ export const createMyActivity = async (
           "You do not have permission to create activities in this challenge",
       });
       return;
-    }
+    };
 
     res.status(500).json({ error: "Failed to create new activity" });
-  }
+  };
 };
 
 export const updateMyActivity = async (
@@ -161,27 +161,27 @@ export const updateMyActivity = async (
         details: z.treeifyError(parsed.error),
       });
       return;
-    }
+    };
 
     if (!supabase) {
       res.status(500).json({ error: "Supabase client not found in request" });
       return;
-    }
+    };
 
     if (!userId) {
       res.status(401).json({ error: "Unauthorized: No user ID found" });
       return;
-    }
+    };
 
     if (Number.isNaN(challengeId)) {
       res.status(400).json({ error: "Invalid challenge id" });
       return;
-    }
+    };
 
     if (Number.isNaN(activityId)) {
       res.status(400).json({ error: "Invalid activity id" });
       return;
-    }
+    };
 
     const updatedActivity = await updateActivity(
       supabase,
@@ -194,7 +194,7 @@ export const updateMyActivity = async (
     res.status(200).json(updatedActivity);
   } catch (error) {
     res.status(500).json({ error: "Failed to update activity" });
-  }
+  };
 };
 
 
@@ -211,21 +211,21 @@ export const deleteMyActivity = async (
     if (!supabase) {
       res.status(500).json({ error: "Supabase client not found in request" });
       return;
-    }
+    };
 
     if (!userId) {
       res.status(401).json({ error: "Unauthorized: No user ID found" });
       return;
-    }
+    };
     if (Number.isNaN(challengeId)) {
       res.status(400).json({ error: "Invalid challenge id" });
       return;
-    }
+    };
 
     if (Number.isNaN(activityId)) {
       res.status(400).json({ error: "Invalid activity id" });
       return;
-    }
+    };
 
     const deletedActivity = await deleteActivity(
       supabase,
@@ -237,6 +237,6 @@ export const deleteMyActivity = async (
     res.status(200).json(deletedActivity);
   } catch (error) {
     res.status(500).json({ error: "Failed to delete activity" });
-  }
+  };
 };
 

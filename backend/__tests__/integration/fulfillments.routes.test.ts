@@ -1,7 +1,10 @@
 import request from "supertest";
 import app from "../../src/server";
 import { supabase } from "../../src/services/supabaseClient";
-import { postFulfillActivity } from "../../src/services/fulfillments.service";
+import {
+  getFulfillmentsByDate,
+  postFulfillActivity,
+} from "../../src/services/fulfillments.service";
 
 jest.mock("../../src/services/fulfillments.service");
 jest.mock("../../src/services/supabaseClient");
@@ -11,6 +14,26 @@ describe("Fulfillments", () => {
   const fakeActivityId = 4;
   const fakeFulfillmentsId = 1;
   const fakeProgressEntryId = 3;
+  const fakeDate = "2025-03-20";
+
+  const fakeFulfillments = [
+    {
+      id: 1,
+      progress_entry_id: fakeProgressEntryId,
+      activity_id: fakeActivityId,
+      activity_name: "Gym workout",
+      planned_duration_minutes: 60,
+      fulfilled_at: "2025-03-20T10:00:00Z",
+    },
+    {
+      id: 1,
+      progress_entry_id: fakeProgressEntryId,
+      activity_id: fakeActivityId,
+      activity_name: "Gym workout",
+      planned_duration_minutes: 60,
+      fulfilled_at: "2025-03-20T10:00:00Z",
+    },
+  ];
 
   const newActivity = {
     name: "Gym workout",
@@ -123,6 +146,73 @@ describe("Fulfillments", () => {
         .expect(500);
 
       expect(response.body.error).toBe("Failed to fulfill activity");
+    });
+  });
+  describe("GET /api/:date/fulfillments", () => {
+    it("returns 200 and and the fulfillments for the selected date", async () => {
+      (getFulfillmentsByDate as jest.Mock).mockResolvedValue(fakeFulfillments);
+
+      const response = await request(app)
+        .get(`/api/${fakeDate}/fulfillments`)
+        .set("Authorization", "Bearer any-fake-token")
+        .expect(200);
+
+      expect(response.body.fulfillments).toEqual(fakeFulfillments);
+      expect(getFulfillmentsByDate).toHaveBeenCalledWith(
+        expect.any(Object),
+        fakeUserId,
+        fakeDate
+      );
+    });
+    it("returns 200 and empty array when no fulfillments exist for the date", async () => {
+      (getFulfillmentsByDate as jest.Mock).mockResolvedValue([]);
+
+      const response = await request(app)
+        .get(`/api/${fakeDate}/fulfillments`)
+        .set("Authorization", "Bearer any-fake-token")
+        .expect(200);
+
+      expect(response.body.fulfillments).toEqual([]);
+
+      expect(getFulfillmentsByDate).toHaveBeenCalledWith(
+        expect.any(Object),
+        fakeUserId,
+        fakeDate
+      );
+    });
+    it("returns 401 if no token is provided", async () => {
+      const response = await request(app)
+        .get(`/api/${fakeDate}/fulfillments`)
+        .expect(401);
+
+      expect(response.body.error).toEqual("No token provided");
+    });
+    it("returns 404 when date is missing", async () => {
+      const response = await request(app)
+        .get("/api/fulfillments") 
+        .set("Authorization", "Bearer any-fake-token")
+        .expect(404);
+    
+    });
+    it("returns 400 when date format is invalid", async () => {
+      const response = await request(app)
+        .get("/api/invalid-date/fulfillments")
+        .set("Authorization", "Bearer any-fake-token")
+        .expect(400);
+    
+      expect(response.body.error).toBe("Invalid date format. Use YYYY-MM-DD");
+    });
+    it("returns 500 if an unexpected server error occurs", async () => {
+      (getFulfillmentsByDate as jest.Mock).mockRejectedValue(
+        new Error("Failed to fetch fulfillments for the date")
+      );
+
+      const response = await request(app)
+        .get(`/api/${fakeDate}/fulfillments`)
+        .set("Authorization", "Bearer any-fake-token")
+        .expect(500);
+
+      expect(response.body.error).toBe("Failed to fetch fulfillments for the date");
     });
   });
 });

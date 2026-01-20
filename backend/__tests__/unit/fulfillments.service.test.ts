@@ -107,6 +107,15 @@ describe("Fulfillments Service", () => {
           planned_duration_minutes: 60,
           fulfilled_at: "2025-03-20T10:00:00Z",
         },
+        {
+            id: 1,
+            progress_entry_id: fakeProgressEntryId,
+            activity_id: fakeActivityId,
+            activity_name: "Gym workout",
+            planned_duration_minutes: 60,
+            fulfilled_at: "2025-03-20T10:00:00Z",
+          },
+        
       ];
 
       const mockSingle = jest.fn().mockResolvedValue({
@@ -163,5 +172,62 @@ describe("Fulfillments Service", () => {
         "daily_activity_fulfillments"
       );
     });
+    it("returns an empty array when no fulfillments exist for the date", async () => {
+  const fakeEmptyFulfillments: any[] = [];
+
+  const mockSingle = jest.fn().mockResolvedValue({
+    data: { id: fakeProgressEntryId },
+    error: null,
+  });
+
+  const mockEqProgress = jest.fn().mockReturnValue({
+    eq: jest.fn().mockReturnValue({
+      single: mockSingle,
+    }),
+  });
+
+  const mockSelectProgress = jest.fn().mockReturnValue({
+    eq: mockEqProgress,
+  });
+
+  const mockOrder = jest.fn().mockResolvedValue({
+    data: fakeEmptyFulfillments,
+    error: null,
+  });
+
+  const mockEqFulfillments = jest.fn().mockReturnValue({
+    order: mockOrder,
+  });
+
+  const mockSelectFulfillments = jest.fn().mockReturnValue({
+    eq: mockEqFulfillments,
+  });
+
+  const mockSupabase = {
+    from: jest.fn((table) => {
+      if (table === "progress_entries") {
+        return { select: mockSelectProgress };
+      }
+
+      if (table === "daily_activity_fulfillments") {
+        return { select: mockSelectFulfillments };
+      }
+
+      throw new Error("Unexpected table");
+    }),
+  };
+
+  const result = await getFulfillmentsByDate(
+    mockSupabase as any,
+    fakeUserId,
+    fakeDate
+  );
+
+  expect(result).toEqual([]);
+  expect(mockSupabase.from).toHaveBeenCalledWith("progress_entries");
+  expect(mockSupabase.from).toHaveBeenCalledWith(
+    "daily_activity_fulfillments"
+  );
+});
   });
 });
