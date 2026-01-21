@@ -232,13 +232,10 @@ describe("Fulfillments Service", () => {
 });
   });
   describe("GET /api/progress/heatmap", () => {
-    const startDate = "2025-03-01";
-    const endDate = "2025-03-31";
-    
    
-  it("returns heatmap data when rpc succeeds", async () => {
+  it("returns heatmap data for all days of a non-leap year, filling missing days with 0", async () => {
     const fakeHeatmapData = [
-      { date: "2025-03-20", count: 3 },
+      { date: "2025-01-01", count: 3 },
       { date: "2025-03-19", count: 1 },
     ];
 
@@ -247,43 +244,57 @@ describe("Fulfillments Service", () => {
       error: null,
     });
 
-    const mockSupabase = {
-      rpc: mockRpc,
-    };
+    const mockSupabase = { rpc: mockRpc };
 
-    const result = await getHeatmapData(
-      mockSupabase as any,
-      fakeUserId,
-      startDate,
-      endDate
-    );
+    const result = await getHeatmapData(mockSupabase as any, fakeUserId, 2025);
+
 
     expect(mockRpc).toHaveBeenCalledWith("get_heatmap_data", {
       p_user_id: fakeUserId,
-      p_start_date: startDate,
-      p_end_date: endDate,
+      p_start_date: "2025-01-01",
+      p_end_date: "2025-12-31",
     });
 
-    expect(result).toEqual(fakeHeatmapData);
+    expect(result.find(d => d.date === "2025-01-01")?.count).toBe(3);
+    expect(result.find(d => d.date === "2025-03-19")?.count).toBe(1);
+
+
+    expect(result.find(d => d.date === "2025-01-02")?.count).toBe(0);
+
+
+    expect(result.length).toBe(365);
   });
-  it("throws an error when rpc returns an error", async () => {
+
+  it("returns heatmap data correctly for a leap year", async () => {
+    const fakeHeatmapData = [{ date: "2024-02-29", count: 7 }];
+
+    const mockRpc = jest.fn().mockResolvedValue({
+      data: fakeHeatmapData,
+      error: null,
+    });
+
+    const mockSupabase = { rpc: mockRpc };
+
+    const result = await getHeatmapData(mockSupabase as any, fakeUserId, 2024);
+
+ 
+    expect(result.find(d => d.date === "2024-02-29")?.count).toBe(7);
+
+
+    expect(result.length).toBe(366);
+  });
+
+  it("throws an error when RPC returns an error", async () => {
     const mockRpc = jest.fn().mockResolvedValue({
       data: null,
       error: { message: "DB exploded" },
     });
-  
-    const mockSupabase = {
-      rpc: mockRpc,
-    };
-  
+
+    const mockSupabase = { rpc: mockRpc };
+
     await expect(
-      getHeatmapData(
-        mockSupabase as any,
-        fakeUserId,
-        startDate,
-        endDate
-      )
+      getHeatmapData(mockSupabase as any, fakeUserId, 2025)
     ).rejects.toThrow("Failed to fetch heatmap data");
   });
-  });
+});
 });
