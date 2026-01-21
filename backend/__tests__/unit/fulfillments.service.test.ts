@@ -2,6 +2,7 @@ import {
   Fulfillments,
   postFulfillActivity,
   getFulfillmentsByDate,
+  getHeatmapData
 } from "../../src/services/fulfillments.service";
 
 describe("Fulfillments Service", () => {
@@ -229,5 +230,60 @@ describe("Fulfillments Service", () => {
     "daily_activity_fulfillments"
   );
 });
+  });
+  describe("GET /api/progress/heatmap", () => {
+    const startDate = "2025-03-01";
+    const endDate = "2025-03-31";
+    
+   
+  it("returns heatmap data when rpc succeeds", async () => {
+    const fakeHeatmapData = [
+      { date: "2025-03-20", count: 3 },
+      { date: "2025-03-19", count: 1 },
+    ];
+
+    const mockRpc = jest.fn().mockResolvedValue({
+      data: fakeHeatmapData,
+      error: null,
+    });
+
+    const mockSupabase = {
+      rpc: mockRpc,
+    };
+
+    const result = await getHeatmapData(
+      mockSupabase as any,
+      fakeUserId,
+      startDate,
+      endDate
+    );
+
+    expect(mockRpc).toHaveBeenCalledWith("get_heatmap_data", {
+      p_user_id: fakeUserId,
+      p_start_date: startDate,
+      p_end_date: endDate,
+    });
+
+    expect(result).toEqual(fakeHeatmapData);
+  });
+  it("throws an error when rpc returns an error", async () => {
+    const mockRpc = jest.fn().mockResolvedValue({
+      data: null,
+      error: { message: "DB exploded" },
+    });
+  
+    const mockSupabase = {
+      rpc: mockRpc,
+    };
+  
+    await expect(
+      getHeatmapData(
+        mockSupabase as any,
+        fakeUserId,
+        startDate,
+        endDate
+      )
+    ).rejects.toThrow("Failed to fetch heatmap data");
+  });
   });
 });

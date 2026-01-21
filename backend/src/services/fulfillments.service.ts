@@ -103,3 +103,25 @@ export async function getFulfillmentsByDate(
   
     return fulfillments ?? [];
   };
+
+
+  export async function getHeatmapData(
+    supabase: SupabaseClient<Database>,
+    userId: string,
+    startDate: string,
+    endDate: string
+  ): Promise<{ date: string; count: number }[]> {
+  
+    const { data, error } = await supabase.rpc("get_heatmap_data", {
+      p_user_id: userId,
+      p_start_date: startDate,
+      p_end_date: endDate,
+    });
+  
+    if (error) {
+      console.error("Error fetching heatmap data:", error);
+      throw new Error("Failed to fetch heatmap data");
+    };
+  
+    return data ?? [];
+  };
