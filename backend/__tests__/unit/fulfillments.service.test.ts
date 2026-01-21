@@ -16,7 +16,7 @@ describe("Fulfillments Service", () => {
     duration_minutes: 60,
   };
 
-  describe("POST /api/fulfillments", () => {
+  describe("POST /api/progress/fulfillments", () => {
     it("returns the fulfillment object for a valid request", async () => {
       const mockSupabase = {
         from: jest.fn((table: string) => {
@@ -96,7 +96,7 @@ describe("Fulfillments Service", () => {
       );
     });
   });
-  describe("GET /api/:date/fulfillments", () => {
+  describe("GET /api/progress/:date/fulfillments", () => {
     it("returns the fulfillments for a specific date when progress entry exists", async () => {
       const fakeFulfillments = [
         {

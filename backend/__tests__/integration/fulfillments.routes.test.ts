@@ -47,7 +47,7 @@ describe("Fulfillments", () => {
     });
   });
 
-  describe("POST /api/fulfillments", () => {
+  describe("POST /api/progress/fulfillments", () => {
     it("retuns 201 and the fulfillment created", async () => {
       const returnFulfillments = {
         success: true,
@@ -65,7 +65,7 @@ describe("Fulfillments", () => {
       (postFulfillActivity as jest.Mock).mockResolvedValue(returnFulfillments);
 
       const response = await request(app)
-        .post(`/api/fulfillments`)
+        .post(`/api/progress/fulfillments`)
         .set("Authorization", "Bearer any-fake-token")
         .send({ activityId: fakeActivityId })
         .expect(201);
@@ -85,14 +85,14 @@ describe("Fulfillments", () => {
     });
     it("returns 401 if no token is provided", async () => {
       const response = await request(app)
-        .get("/api/active-challenge")
+        .get("/api/progress/active-challenge")
         .expect(401);
 
       expect(response.body.error).toEqual("No token provided");
     });
     it("returns 400 if no activity id is provided", async () => {
       const response = await request(app)
-        .post(`/api/fulfillments`)
+        .post(`/api/progress/fulfillments`)
         .set("Authorization", "Bearer any-fake-token")
         .send({ activityId: null })
         .expect(400);
@@ -103,7 +103,7 @@ describe("Fulfillments", () => {
     });
     it("returns 400 if  activity id is a negative number", async () => {
       const response = await request(app)
-        .post(`/api/fulfillments`)
+        .post(`/api/progress/fulfillments`)
         .set("Authorization", "Bearer any-fake-token")
         .send({ activityId: -1 })
         .expect(400);
@@ -114,7 +114,7 @@ describe("Fulfillments", () => {
     });
     it("returns 400 if  activity id is zero", async () => {
       const response = await request(app)
-        .post(`/api/fulfillments`)
+        .post(`/api/progress/fulfillments`)
         .set("Authorization", "Bearer any-fake-token")
         .send({ activityId: 0 })
         .expect(400);
@@ -125,7 +125,7 @@ describe("Fulfillments", () => {
     });
     it("returns 400 if  activity id is a string", async () => {
       const response = await request(app)
-        .post(`/api/fulfillments`)
+        .post(`/api/progress/fulfillments`)
         .set("Authorization", "Bearer any-fake-token")
         .send({ activityId: "abc" })
         .expect(400);
@@ -140,7 +140,7 @@ describe("Fulfillments", () => {
       );
 
       const response = await request(app)
-        .post(`/api/fulfillments`)
+        .post(`/api/progress/fulfillments`)
         .set("Authorization", "Bearer any-fake-token")
         .send({ activityId: fakeActivityId })
         .expect(500);
@@ -148,12 +148,12 @@ describe("Fulfillments", () => {
       expect(response.body.error).toBe("Failed to fulfill activity");
     });
   });
-  describe("GET /api/:date/fulfillments", () => {
+  describe("GET /api/progress/:date/fulfillments", () => {
     it("returns 200 and and the fulfillments for the selected date", async () => {
       (getFulfillmentsByDate as jest.Mock).mockResolvedValue(fakeFulfillments);
 
       const response = await request(app)
-        .get(`/api/${fakeDate}/fulfillments`)
+        .get(`/api/progress/${fakeDate}/fulfillments`)
         .set("Authorization", "Bearer any-fake-token")
         .expect(200);
 
@@ -168,7 +168,7 @@ describe("Fulfillments", () => {
       (getFulfillmentsByDate as jest.Mock).mockResolvedValue([]);
 
       const response = await request(app)
-        .get(`/api/${fakeDate}/fulfillments`)
+        .get(`/api/progress/${fakeDate}/fulfillments`)
         .set("Authorization", "Bearer any-fake-token")
         .expect(200);
 
@@ -182,21 +182,21 @@ describe("Fulfillments", () => {
     });
     it("returns 401 if no token is provided", async () => {
       const response = await request(app)
-        .get(`/api/${fakeDate}/fulfillments`)
+        .get(`/api/progress/${fakeDate}/fulfillments`)
         .expect(401);
 
       expect(response.body.error).toEqual("No token provided");
     });
     it("returns 404 when date is missing", async () => {
       const response = await request(app)
-        .get("/api/fulfillments") 
+        .get("/api/progress/fulfillments") 
         .set("Authorization", "Bearer any-fake-token")
         .expect(404);
     
     });
     it("returns 400 when date format is invalid", async () => {
       const response = await request(app)
-        .get("/api/invalid-date/fulfillments")
+        .get("/api/progress/invalid-date/fulfillments")
         .set("Authorization", "Bearer any-fake-token")
         .expect(400);
     
@@ -208,7 +208,7 @@ describe("Fulfillments", () => {
       );
 
       const response = await request(app)
-        .get(`/api/${fakeDate}/fulfillments`)
+        .get(`/api/progress/${fakeDate}/fulfillments`)
         .set("Authorization", "Bearer any-fake-token")
         .expect(500);
 

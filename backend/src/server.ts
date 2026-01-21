@@ -41,8 +41,8 @@ app.post("/api/challenges/:challengeId/activate", activateMyChallenge);
 app.delete("/api/activate-challenge", deleteMyActiveChallenge);
 
 
-app.post("/api/fulfillments", postMyFulfillActivity);
-app.get("/api/:date/fulfillments", getMyFulfillActiviesByDate);
+app.post("/api/progress/fulfillments", postMyFulfillActivity);
+app.get("/api/progress/:date/fulfillments", getMyFulfillActiviesByDate);
 
 
 export default app; 
