@@ -3,6 +3,7 @@ import app from "../../src/server";
 import { supabase } from "../../src/services/supabaseClient";
 import {
   getFulfillmentsByDate,
+  getHeatmapData,
   postFulfillActivity,
 } from "../../src/services/fulfillments.service";
 
@@ -214,5 +215,23 @@ describe("Fulfillments", () => {
 
       expect(response.body.error).toBe("Failed to fetch fulfillments for the date");
     });
+    describe("GET /api/progress/fulfillments", ()  => {
+
+      const fakeHeatmapData = [
+        { date: "2025-01-01", count: 3 },
+        { date: "2025-03-19", count: 1 },
+      ];
+
+      it("returns 200 and the all activities marked as completed between a year", async () => {
+        (getHeatmapData as jest.Mock).mockResolvedValue(fakeHeatmapData);
+
+        const response = await request(app)
+        .get("/api/progress/heatmap")
+        .set("Authorization", "Bearer any-fake-token")
+        .expect(200);
+        
+        expect(response.body).toEqual(fakeHeatmapData);
+      })
+    })
   });
 });

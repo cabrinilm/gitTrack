@@ -58,7 +58,7 @@ export async function postFulfillActivity(
 
   if (fulfillError) {
     if (fulfillError.code === "23505") {
-      throw new Error("Essa atividade já foi marcada hoje");
+      throw new Error("Already marked");
     }
     console.error("Failed to insert fulfillment:", fulfillError);
     throw new Error("Failed to mark activity as fulfilled");

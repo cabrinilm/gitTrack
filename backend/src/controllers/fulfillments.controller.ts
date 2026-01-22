@@ -1,5 +1,5 @@
 import type {Request, Response} from "express";
-import { getFulfillmentsByDate, postFulfillActivity } from "../services/fulfillments.service";
+import { getFulfillmentsByDate, getHeatmapData, postFulfillActivity } from "../services/fulfillments.service";
 
 
 
@@ -38,7 +38,7 @@ export const postMyFulfillActivity = async (
   };
 
 
-  export const getMyFulfillActiviesByDate = async (
+  export const getMyFulfillActivitiesByDate = async (
     req: Request,
     res: Response
   ): Promise<void>  => {
@@ -75,5 +75,33 @@ export const postMyFulfillActivity = async (
     } catch (error) {
       console.error("Error fetching fulfillments by date:", error);
       res.status(500).json({ error: "Failed to fetch fulfillments for the date" });
-    }
+    };
+  };
+
+  export const getMyHeatMapData = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
+
+    try {
+      const supabase = req.supabase;
+      const userId = req.user?.id;
+
+      if (!supabase) {
+        res.status(500).json({ error: "Supabase client not found in request" });
+        return;
+      };
+  
+      if (!userId) {
+        res.status(401).json({ error: "Unauthorized" });
+        return;
+      };
+
+      const result = await getHeatmapData(supabase, userId);
+
+      res.status(200).json(result)
+
+    } catch {
+      res.status(500).json({error : "Failed to load the heat map"});
+    };
   };
