@@ -86,7 +86,7 @@ export const postMyFulfillActivity = async (
     try {
       const supabase = req.supabase;
       const userId = req.user?.id;
-
+      const year = req.query.year ? Number(req.query.year) : undefined;
       if (!supabase) {
         res.status(500).json({ error: "Supabase client not found in request" });
         return;
@@ -96,8 +96,12 @@ export const postMyFulfillActivity = async (
         res.status(401).json({ error: "Unauthorized" });
         return;
       };
+      if (year !== undefined && Number.isNaN(year)) {
+        res.status(400).json({ error: "Invalid year" });
+        return;
+      };
 
-      const result = await getHeatmapData(supabase, userId);
+      const result = await getHeatmapData(supabase, userId, year);
 
       res.status(200).json(result)
 

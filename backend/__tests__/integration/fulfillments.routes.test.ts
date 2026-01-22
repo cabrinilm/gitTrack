@@ -190,17 +190,16 @@ describe("Fulfillments", () => {
     });
     it("returns 404 when date is missing", async () => {
       const response = await request(app)
-        .get("/api/progress/fulfillments") 
+        .get("/api/progress/fulfillments")
         .set("Authorization", "Bearer any-fake-token")
         .expect(404);
-    
     });
     it("returns 400 when date format is invalid", async () => {
       const response = await request(app)
         .get("/api/progress/invalid-date/fulfillments")
         .set("Authorization", "Bearer any-fake-token")
         .expect(400);
-    
+
       expect(response.body.error).toBe("Invalid date format. Use YYYY-MM-DD");
     });
     it("returns 500 if an unexpected server error occurs", async () => {
@@ -213,10 +212,11 @@ describe("Fulfillments", () => {
         .set("Authorization", "Bearer any-fake-token")
         .expect(500);
 
-      expect(response.body.error).toBe("Failed to fetch fulfillments for the date");
+      expect(response.body.error).toBe(
+        "Failed to fetch fulfillments for the date"
+      );
     });
-    describe("GET /api/progress/fulfillments", ()  => {
-
+    describe("GET /api/progress/heatmap", () => {
       const fakeHeatmapData = [
         { date: "2025-01-01", count: 3 },
         { date: "2025-03-19", count: 1 },
@@ -226,12 +226,62 @@ describe("Fulfillments", () => {
         (getHeatmapData as jest.Mock).mockResolvedValue(fakeHeatmapData);
 
         const response = await request(app)
-        .get("/api/progress/heatmap")
-        .set("Authorization", "Bearer any-fake-token")
-        .expect(200);
-        
+          .get("/api/progress/heatmap")
+          .set("Authorization", "Bearer any-fake-token")
+          .expect(200);
+
         expect(response.body).toEqual(fakeHeatmapData);
-      })
-    })
+        expect(getHeatmapData).toHaveBeenCalledTimes(1);
+        expect(getHeatmapData).toHaveBeenCalledWith(
+          expect.any(Object),
+          expect.any(String),
+          undefined
+        );
+      });
+      it("returns 200 and heatmap data for a specific year", async () => {
+        (getHeatmapData as jest.Mock).mockResolvedValue(fakeHeatmapData);
+
+        await request(app)
+          .get("/api/progress/heatmap?year=2025")
+          .set("Authorization", "Bearer any-fake-token")
+          .expect(200);
+
+        expect(getHeatmapData).toHaveBeenCalledWith(
+          expect.any(Object),
+          expect.any(String),
+          2025
+        );
+      });
+
+      it("returns 401 if no token is provided", async () => {
+        const response = await request(app)
+          .get("/api/progress/heatmap")
+          .expect(401);
+
+        expect(response.body.error).toEqual("No token provided");
+      });
+      it("returns 400 if year is not a valid number", async () => {
+        const response = await request(app)
+          .get("/api/progress/heatmap?year=abc")
+          .set("Authorization", "Bearer any-fake-token")
+          .expect(400);
+
+        expect(response.body.error).toEqual("Invalid year");
+
+        expect(getHeatmapData).not.toHaveBeenCalled();
+      });
+      it("returns 500 when the service throws an error", async () => {
+        (getHeatmapData as jest.Mock).mockRejectedValue(
+          new Error("Failed to fetch heatmap data")
+        );
+
+        const response = await request(app)
+          .get("/api/progress/heatmap")
+          .set("Authorization", "Bearer any-fake-token")
+          .expect(500);
+
+        expect(response.body.error).toEqual("Failed to load the heat map");
+      });
+    });
   });
 });
