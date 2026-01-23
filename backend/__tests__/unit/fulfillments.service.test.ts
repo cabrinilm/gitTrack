@@ -2,8 +2,9 @@ import {
   Fulfillments,
   postFulfillActivity,
   getFulfillmentsByDate,
-  getHeatmapData
+  getHeatmapData,
 } from "../../src/services/fulfillments.service";
+import { supabase } from "../../src/services/supabaseClient";
 
 describe("Fulfillments Service", () => {
   const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
@@ -109,14 +110,13 @@ describe("Fulfillments Service", () => {
           fulfilled_at: "2025-03-20T10:00:00Z",
         },
         {
-            id: 1,
-            progress_entry_id: fakeProgressEntryId,
-            activity_id: fakeActivityId,
-            activity_name: "Gym workout",
-            planned_duration_minutes: 60,
-            fulfilled_at: "2025-03-20T10:00:00Z",
-          },
-        
+          id: 1,
+          progress_entry_id: fakeProgressEntryId,
+          activity_id: fakeActivityId,
+          activity_name: "Gym workout",
+          planned_duration_minutes: 60,
+          fulfilled_at: "2025-03-20T10:00:00Z",
+        },
       ];
 
       const mockSingle = jest.fn().mockResolvedValue({
@@ -174,127 +174,129 @@ describe("Fulfillments Service", () => {
       );
     });
     it("returns an empty array when no fulfillments exist for the date", async () => {
-  const fakeEmptyFulfillments: any[] = [];
+      const fakeEmptyFulfillments: any[] = [];
 
-  const mockSingle = jest.fn().mockResolvedValue({
-    data: { id: fakeProgressEntryId },
-    error: null,
-  });
+      const mockSingle = jest.fn().mockResolvedValue({
+        data: { id: fakeProgressEntryId },
+        error: null,
+      });
 
-  const mockEqProgress = jest.fn().mockReturnValue({
-    eq: jest.fn().mockReturnValue({
-      single: mockSingle,
-    }),
-  });
+      const mockEqProgress = jest.fn().mockReturnValue({
+        eq: jest.fn().mockReturnValue({
+          single: mockSingle,
+        }),
+      });
 
-  const mockSelectProgress = jest.fn().mockReturnValue({
-    eq: mockEqProgress,
-  });
+      const mockSelectProgress = jest.fn().mockReturnValue({
+        eq: mockEqProgress,
+      });
 
-  const mockOrder = jest.fn().mockResolvedValue({
-    data: fakeEmptyFulfillments,
-    error: null,
-  });
+      const mockOrder = jest.fn().mockResolvedValue({
+        data: fakeEmptyFulfillments,
+        error: null,
+      });
 
-  const mockEqFulfillments = jest.fn().mockReturnValue({
-    order: mockOrder,
-  });
+      const mockEqFulfillments = jest.fn().mockReturnValue({
+        order: mockOrder,
+      });
 
-  const mockSelectFulfillments = jest.fn().mockReturnValue({
-    eq: mockEqFulfillments,
-  });
+      const mockSelectFulfillments = jest.fn().mockReturnValue({
+        eq: mockEqFulfillments,
+      });
 
-  const mockSupabase = {
-    from: jest.fn((table) => {
-      if (table === "progress_entries") {
-        return { select: mockSelectProgress };
-      }
+      const mockSupabase = {
+        from: jest.fn((table) => {
+          if (table === "progress_entries") {
+            return { select: mockSelectProgress };
+          }
 
-      if (table === "daily_activity_fulfillments") {
-        return { select: mockSelectFulfillments };
-      }
+          if (table === "daily_activity_fulfillments") {
+            return { select: mockSelectFulfillments };
+          }
 
-      throw new Error("Unexpected table");
-    }),
-  };
+          throw new Error("Unexpected table");
+        }),
+      };
 
-  const result = await getFulfillmentsByDate(
-    mockSupabase as any,
-    fakeUserId,
-    fakeDate
-  );
+      const result = await getFulfillmentsByDate(
+        mockSupabase as any,
+        fakeUserId,
+        fakeDate
+      );
 
-  expect(result).toEqual([]);
-  expect(mockSupabase.from).toHaveBeenCalledWith("progress_entries");
-  expect(mockSupabase.from).toHaveBeenCalledWith(
-    "daily_activity_fulfillments"
-  );
-});
+      expect(result).toEqual([]);
+      expect(mockSupabase.from).toHaveBeenCalledWith("progress_entries");
+      expect(mockSupabase.from).toHaveBeenCalledWith(
+        "daily_activity_fulfillments"
+      );
+    });
   });
   describe("GET /api/progress/heatmap", () => {
-   
-  it("returns heatmap data for all days of a non-leap year, filling missing days with 0", async () => {
-    const fakeHeatmapData = [
-      { date: "2025-01-01", count: 3 },
-      { date: "2025-03-19", count: 1 },
-    ];
+    it("returns heatmap data for all days of a non-leap year, filling missing days with 0", async () => {
+      const fakeHeatmapData = [
+        { date: "2025-01-01", count: 3 },
+        { date: "2025-03-19", count: 1 },
+      ];
 
-    const mockRpc = jest.fn().mockResolvedValue({
-      data: fakeHeatmapData,
-      error: null,
+      const mockRpc = jest.fn().mockResolvedValue({
+        data: fakeHeatmapData,
+        error: null,
+      });
+
+      const mockSupabase = { rpc: mockRpc };
+
+      const result = await getHeatmapData(
+        mockSupabase as any,
+        fakeUserId,
+        2025
+      );
+
+      expect(mockRpc).toHaveBeenCalledWith("get_heatmap_data", {
+        p_user_id: fakeUserId,
+        p_start_date: "2025-01-01",
+        p_end_date: "2025-12-31",
+      });
+
+      expect(result.find((d) => d.date === "2025-01-01")?.count).toBe(3);
+      expect(result.find((d) => d.date === "2025-03-19")?.count).toBe(1);
+
+      expect(result.find((d) => d.date === "2025-01-02")?.count).toBe(0);
+
+      expect(result.length).toBe(365);
     });
 
-    const mockSupabase = { rpc: mockRpc };
+    it("returns heatmap data correctly for a leap year", async () => {
+      const fakeHeatmapData = [{ date: "2024-02-29", count: 7 }];
 
-    const result = await getHeatmapData(mockSupabase as any, fakeUserId, 2025);
+      const mockRpc = jest.fn().mockResolvedValue({
+        data: fakeHeatmapData,
+        error: null,
+      });
 
+      const mockSupabase = { rpc: mockRpc };
 
-    expect(mockRpc).toHaveBeenCalledWith("get_heatmap_data", {
-      p_user_id: fakeUserId,
-      p_start_date: "2025-01-01",
-      p_end_date: "2025-12-31",
+      const result = await getHeatmapData(
+        mockSupabase as any,
+        fakeUserId,
+        2024
+      );
+
+      expect(result.find((d) => d.date === "2024-02-29")?.count).toBe(7);
+
+      expect(result.length).toBe(366);
     });
 
-    expect(result.find(d => d.date === "2025-01-01")?.count).toBe(3);
-    expect(result.find(d => d.date === "2025-03-19")?.count).toBe(1);
+    it("throws an error when RPC returns an error", async () => {
+      const mockRpc = jest.fn().mockResolvedValue({
+        data: null,
+        error: { message: "DB exploded" },
+      });
 
+      const mockSupabase = { rpc: mockRpc };
 
-    expect(result.find(d => d.date === "2025-01-02")?.count).toBe(0);
-
-
-    expect(result.length).toBe(365);
+      await expect(
+        getHeatmapData(mockSupabase as any, fakeUserId, 2025)
+      ).rejects.toThrow("Failed to fetch heatmap data");
+    });
   });
-
-  it("returns heatmap data correctly for a leap year", async () => {
-    const fakeHeatmapData = [{ date: "2024-02-29", count: 7 }];
-
-    const mockRpc = jest.fn().mockResolvedValue({
-      data: fakeHeatmapData,
-      error: null,
-    });
-
-    const mockSupabase = { rpc: mockRpc };
-
-    const result = await getHeatmapData(mockSupabase as any, fakeUserId, 2024);
-
- 
-    expect(result.find(d => d.date === "2024-02-29")?.count).toBe(7);
-
-
-    expect(result.length).toBe(366);
-  });
-
-  it("throws an error when RPC returns an error", async () => {
-    const mockRpc = jest.fn().mockResolvedValue({
-      data: null,
-      error: { message: "DB exploded" },
-    });
-
-    const mockSupabase = { rpc: mockRpc };
-
-    await expect(
-      getHeatmapData(mockSupabase as any, fakeUserId, 2025)
-    ).rejects.toThrow("Failed to fetch heatmap data");
-  });
-});
 });
