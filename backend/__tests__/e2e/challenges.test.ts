@@ -3,7 +3,8 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import  app from "../../src/server";
 import dotenv from "dotenv";
 import { Database } from "../../src/types/supabase";
-import { Challenges } from "../../src/services/challenges.service";
+// import { Challenges } from "../../src/services/challenges.service";
+import { CreateChallengeInput } from "../../src/types/challenges.types";
 
 dotenv.config();
 
@@ -16,7 +17,8 @@ describe("Challenge", () => {
 
     let supabase: SupabaseClient<Database>;
     let userId: string;
-    const testTitlePrefix = "test_event_";
+    const testNamePrefix = "Test Challenge";
+
   
     const authHeader = { Authorization: `Bearer ${bearerToken}` };
   
@@ -34,19 +36,15 @@ describe("Challenge", () => {
   
     beforeAll(async () => {
       if (!bearerToken) throw new Error("Missing SUPABASE_BEARER_TOKEN");
-  
-      supabase = createClient<Database>(supabaseUrl, supabaseKey, {
-        global: { headers: authHeader },
-      });
-  
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-  
-      if (!user) throw new Error("Test user not found");
-      userId = user.id;
-  
-   
+
+    supabase = createClient<Database>(supabaseUrl, supabaseKey, {
+      global: { headers: authHeader },
+    });
+
+    const { data: { user }, error } = await supabase.auth.getUser();
+
+    if (error || !user) throw new Error("Test user not found or error: " + error?.message);
+    userId = user.id;
     });
   
     afterEach(async () => {
@@ -56,15 +54,28 @@ describe("Challenge", () => {
         .from("challenges")
         .delete()
         .eq("user_id", userId)
-        .eq("id", challengeId)
-        .like("title", `${testTitlePrefix}%`);
+        .ilike("name", `${testNamePrefix}%`);
     });
   describe("POST /api/challenges",  () => {
-    it("should create challenge and active as used challenge", async () => {
-      const body: Challenges ={
-        
-      }
-    })
-  })
+    it("should create challenge and activate it", async () => {
+      const body: CreateChallengeInput = {
+        name: `${testNamePrefix} - ${Date.now()}`, // unique name to avoid conflicts
+        description: "New Challenge",
+      };
 
-})
+      const res = await makeRequest("post", "/api/challenges", body).expect(201);
+
+      expect(res.body).toMatchObject({
+        name: body.name,
+        description: body.description,
+        user_id: userId,
+      });
+      expect(res.body.id).toBeDefined();
+      expect(res.body.created_at).toBeDefined();
+
+
+
+    });
+  });
+
+});
