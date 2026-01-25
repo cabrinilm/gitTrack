@@ -59,7 +59,7 @@ describe("Challenge", () => {
   describe("POST /api/challenges",  () => {
     it("should create challenge and activate it", async () => {
       const body: CreateChallengeInput = {
-        name: `${testNamePrefix} - ${Date.now()}`, // unique name to avoid conflicts
+        name: `${testNamePrefix} - ${Date.now()}`, 
         description: "New Challenge",
       };
 
