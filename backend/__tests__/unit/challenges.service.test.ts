@@ -1,4 +1,8 @@
-import type { Challenges } from "../../src/services/challenges.service";
+import type {
+  Challenges,
+  CreateChallengeInput,
+  UpdateChallengeInput,
+} from "../../src/types/challenges.types";
 import {
   getChallenges,
   getChallengeById,
@@ -142,7 +146,7 @@ describe("Challenges", () => {
   });
 
   describe("POST /api/challenges", () => {
-    const newChallenge = {
+    const newChallenge: CreateChallengeInput = {
       name: "Basic goals",
       description: "I want to learn 3 new activities",
     };
@@ -152,7 +156,6 @@ describe("Challenges", () => {
         ...newChallenge,
         id: "fake-id-123",
         created_at: "2026-01-04T15:57:53.336Z",
-        updated_at: "2026-01-04T15:57:53.337Z",
         user_id: fakeUserId,
       };
 
@@ -165,7 +168,6 @@ describe("Challenges", () => {
                   ...newChallenge,
                   id: "fake-id-123",
                   created_at: "2026-01-04T15:57:53.336Z",
-                  updated_at: "2026-01-04T15:57:53.337Z",
                   user_id: fakeUserId,
                 },
                 error: null,
@@ -205,7 +207,7 @@ describe("Challenges", () => {
 
   describe("PATCH /api/challenges/:challengeId", () => {
     it("should update challenge and return updated data", async () => {
-      const updates = {
+      const updates: UpdateChallengeInput = {
         name: "Name updated",
         description: "New description",
       };
@@ -216,7 +218,6 @@ describe("Challenges", () => {
         name: "Name updated",
         description: "New description",
         created_at: "2026-01-04T15:57:53.336Z",
-        updated_at: new Date().toISOString(),
       };
 
       const mockSupabase = {
@@ -231,7 +232,6 @@ describe("Challenges", () => {
                       id: fakeChallengeId,
                       user_id: fakeUserId,
                       created_at: "2026-01-04T15:57:53.336Z",
-                      updated_at: expectedUpdatedChallenge.updated_at,
                     },
                     error: null,
                   }),
@@ -259,8 +259,7 @@ describe("Challenges", () => {
       expect(updated).toEqual(expectedUpdatedChallenge);
     });
     it("should throw an error if Supabase returns an error", async () => {
-     
-      const updates = {
+      const updates: UpdateChallengeInput = {
         name: "Name updated",
         description: "New description",
       };
@@ -295,15 +294,12 @@ describe("Challenges", () => {
 
   describe("DELETE  /api/challenges/:challengeId", () => {
     it("should return the deleted challenge data", async () => {
-     
-
       const deletedChallengeData = {
         id: fakeChallengeId,
         user_id: fakeUserId,
         name: "Challenge to delete",
         description: "This will be deleted",
         created_at: "2026-01-04T15:57:53.336Z",
-        updated_at: "2026-01-04T15:57:53.336Z",
       };
 
       const mockSupabase = {

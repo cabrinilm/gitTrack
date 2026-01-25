@@ -3,6 +3,7 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import  app from "../../src/server";
 import dotenv from "dotenv";
 import { Database } from "../../src/types/supabase";
+import { Challenges } from "../../src/services/challenges.service";
 
 dotenv.config();
 
@@ -11,7 +12,7 @@ const supabaseKey = process.env.SUPABASE_ANON_KEY!;
 const bearerToken = process.env.SUPABASE_BEARER_TOKEN;
 
 
-describe("Activities", () => {
+describe("Challenge", () => {
 
     let supabase: SupabaseClient<Database>;
     let userId: string;
@@ -52,11 +53,18 @@ describe("Activities", () => {
       if (!userId) return;
   
       await supabase
-        .from("activities")
+        .from("challenges")
         .delete()
-        .eq("creator_id", userId)
+        .eq("user_id", userId)
+        .eq("id", challengeId)
         .like("title", `${testTitlePrefix}%`);
     });
-
+  describe("POST /api/challenges",  () => {
+    it("should create challenge and active as used challenge", async () => {
+      const body: Challenges ={
+        
+      }
+    })
+  })
 
 })

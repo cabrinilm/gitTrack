@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../types/supabase";
-import { Challenges } from "./challenges.service";
+import { Challenges } from "../types/challenges.types";
 import { supabase } from "./supabaseClient";
 export type Active_Challenge =
   Database["public"]["Tables"]["active_challenges"]["Row"];

@@ -1,14 +1,15 @@
 import request from "supertest";
 import app from "../../src/server";
+import type { Challenges } from "../../src/types/challenges.types";
 import {
   getChallenges,
   createChallenge,
   updateChallenge,
   deleteChallenge,
-  getChallengeById,
-  Challenges,
+  getChallengeById
 } from "../../src/services/challenges.service";
 import { supabase } from "../../src/services/supabaseClient";
+
 
 jest.mock("../../src/services/challenges.service");
 jest.mock("../../src/services/supabaseClient");
@@ -88,8 +89,8 @@ describe("Challenges", () => {
   });
   describe("GET /api/challenges/:challengeId", () => {
     it("returns 200 and the selected challenge", async () => {
-      const selectedChallenge = {
-        id: fakeChallengeId,
+      const selectedChallenge: Challenges = {
+        id: Number(fakeChallengeId),
         user_id: fakeUserId,
         name: "Basic goals",
         description: "I want to learn 3 new activities",

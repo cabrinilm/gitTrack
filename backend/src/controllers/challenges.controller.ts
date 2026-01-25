@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
+import type { Challenges, CreateChallengeInput } from "../types/challenges.types";
 import {
-  Challenges,
   createChallenge,
   deleteChallenge,
   getChallengeById,
@@ -97,10 +97,12 @@ export const createMyChallenge = async (
       });
       return;
     }
-    const normalizedData = {
+   
+    const normalizedData: CreateChallengeInput = {
       ...parsed.data,
       description: parsed.data.description ?? null,
     };
+    
 
     const newChallenge = await createChallenge(
       supabase,

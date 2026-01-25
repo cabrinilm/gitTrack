@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../types/supabase";
-export type Challenges = Database["public"]["Tables"]["challenges"]["Row"];
+import { Challenges, CreateChallengeInput, UpdateChallengeInput } from "../types/challenges.types";
+
 
 export async function getChallenges(
   supabase: SupabaseClient<Database>,
@@ -44,7 +45,7 @@ export async function getChallengeById(
 export async function createChallenge(
   supabase: SupabaseClient<Database>,
   userId: string,
-  challenge: Omit<Challenges, "id" | "created_at" | "updated_at" | "user_id">
+  challenge: CreateChallengeInput
 ): Promise<Challenges> {
   const { data, error } = await supabase
     .from("challenges")
@@ -63,7 +64,7 @@ export async function updateChallenge(
   supabase: SupabaseClient<Database>,
   userId: string,
   challengeId: number,
-  challenge: Omit<Challenges, "created_at" | "updated_at" | "user_id" | "id">
+  challenge: UpdateChallengeInput
 ): Promise<Challenges> {
   const { data, error } = await supabase
     .from("challenges")
