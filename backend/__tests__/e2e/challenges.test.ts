@@ -50,11 +50,11 @@ describe("Challenge", () => {
     afterEach(async () => {
       if (!userId) return;
   
-      await supabase
-        .from("challenges")
-        .delete()
-        .eq("user_id", userId)
-        .ilike("name", `${testNamePrefix}%`);
+      // await supabase
+      //   .from("challenges")
+      //   .delete()
+      //   .eq("user_id", userId)
+      //   .ilike("name", `${testNamePrefix}%`);
     });
   describe("POST /api/challenges",  () => {
     it("should create challenge and activate it", async () => {
@@ -72,9 +72,18 @@ describe("Challenge", () => {
       });
       expect(res.body.id).toBeDefined();
       expect(res.body.created_at).toBeDefined();
-
-
-
+      console.log(res.body.id);
+    //   const { data: active } = await supabase
+    //   .from("active_challenges")
+    //   .select("*")
+    //   .eq("user_id", userId)
+    //   .single();
+    // console.log(res.body.id)
+    // expect(active?.challenge_id).toBe(res.body.id);
+//     const activeRes = await makeRequest("get", "/api/active-challenge");
+// expect(activeRes.status).toBe(200);
+// expect(activeRes.body.activeChallenge.id).toBe(res.body.id);
+   
     });
   });
 
