@@ -1,5 +1,4 @@
 import {
-  Challenges,
   updateChallenge,
 } from "../../src/services/challenges.service";
 import {
@@ -8,7 +7,7 @@ import {
   deleteActiveChallenge,
   Active_Challenge,
 } from "../../src/services/active_challenge.service";
-
+import { Challenges } from "../../src/types/challenges.types";
 describe("Active_challenge", () => {
   const fakeUserId = "123e4567-e89b-12d3-a456-426614174000";
   const fakeChallengeId = 2;
