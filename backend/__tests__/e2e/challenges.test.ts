@@ -21,7 +21,7 @@ describe("Challenge", () => {
   let userBId: string;
   const testNamePrefix = "Test Challenge";
 
- 
+
 const authHeaderUserA = { Authorization: `Bearer ${bearerTokenUserA}` };
 const authHeaderUserB = { Authorization: `Bearer ${bearerTokenUserB}` };
 
@@ -45,11 +45,12 @@ const authHeaderUserB = { Authorization: `Bearer ${bearerTokenUserB}` };
     supabaseUserA = createClient(supabaseUrl, supabaseKey, {
       global: { headers: authHeaderUserA },
     });
+
   
     supabaseUserB = createClient(supabaseUrl, supabaseKey, {
       global: { headers: authHeaderUserB },
     });
-  
+   
     const { data: userAData } = await supabaseUserA.auth.getUser();
     const { data: userBData } = await supabaseUserB.auth.getUser();
   
@@ -104,6 +105,30 @@ const authHeaderUserB = { Authorization: `Bearer ${bearerTokenUserB}` };
         challenge_id: res.body.id,
         activated_at: expect.any(String),
       });
+    });
+    it("should not allow user B to activate user A challenge", async () => {
+      const body: CreateChallengeInput = {
+        name: `${testNamePrefix} - ${Date.now()}`,
+        description: "User A challenge",
+      };
+    
+     
+      const challengeRes = await makeRequest(
+        "post",
+        "/api/challenges",
+        body,
+        authHeaderUserA
+      ).expect(201);
+    
+      const challengeId = challengeRes.body.id;
+    console.log(userAId)
+   console.log(userBId)
+      await makeRequest(
+        "post",
+        `/api/challenges/${challengeId}/activate`,
+        undefined,
+        authHeaderUserB
+      ).expect(404);
     });
   });
 });

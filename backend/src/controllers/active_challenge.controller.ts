@@ -59,9 +59,17 @@ export const activateMyChallenge = async (
     const result = await activateChallenge(supabase, userId, challengeId);
 
     res.status(201).json(result);
-  } catch (error) {
-    console.error("Error activating challenge :", error);
-    res.status(500).json({ error: "Failed to update activate challenge" });
+  }catch (error: any) {
+    // Garante que error.message existe antes de usar includes
+    const message = error?.message ?? "";
+    if (message.includes("Forbidden")) {
+      res.status(403).json({ error: message });
+    } else if (message.includes("Challenge not found")) {
+      res.status(404).json({ error: message });
+    } else {
+      console.error(error);
+      res.status(500).json({ error: "Failed to update active challenge" });
+    }
   }
 };
 
