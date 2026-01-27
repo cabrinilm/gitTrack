@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../types/supabase";
 import { CreateActivityInput } from "../schemas/activity.schema";
-export type Activities = Database["public"]["Tables"]["activities"]["Row"];
+import type { Activities, UpdateActivitiesInput } from "../types/activities.types";
 
 export async function getActivities(
   supabase: SupabaseClient<Database>,
@@ -90,7 +90,7 @@ export async function updateActivity(
   userId: string,
   challengeId: number,
   activityId: number,
-  updates: Partial<Activities>
+  updates: UpdateActivitiesInput
 ): Promise<Activities> {
   const { data, error } = await supabase
     .from("activities")

@@ -1,4 +1,4 @@
-import type { Activities } from "../../src/services/activities.service";
+import type { Activities, CreateActivitiesInput, UpdateActivitiesInput } from "../../src/types/activities.types";
 import {
   getActivities,
   getActivityById,
@@ -14,13 +14,14 @@ describe("Activities", () => {
 
   describe("GET /api/:challengeId/activities", () => {
     it("returns activities for a valid request", async () => {
-      const listActivities = [
+      const listActivities: Activities[] = [
         {
           id: 1,
           challenge_id: fakeChallengeId,
           name: "Gym workout",
           duration_minutes: 60,
           order_num: 1,
+          user_id: fakeUserId
         },
         {
           id: 2,
@@ -28,6 +29,7 @@ describe("Activities", () => {
           name: "Sleep",
           duration_minutes: 480,
           order_num: 2,
+          user_id: fakeUserId
         },
         {
           id: 3,
@@ -35,6 +37,7 @@ describe("Activities", () => {
           name: "Health meal",
           duration_minutes: 20,
           order_num: 3,
+          user_id: fakeUserId
         },
       ];
 
@@ -115,12 +118,13 @@ describe("Activities", () => {
   });
   describe("GET /api/:challengeId/activities/activitiesId", () => {
     it("returns specific activity for a valid request", async () => {
-      const activity = {
+      const activity: Activities = {
         id: 1,
         challenge_id: fakeChallengeId,
         name: "Gym workout",
         duration_minutes: 60,
         order_num: 1,
+        user_id: fakeUserId
       };
 
       const mockSupabase = {
@@ -186,7 +190,7 @@ describe("Activities", () => {
     });
   });
   describe("POST /api/:challengeId/activities", () => {
-    const newActivity = {
+    const newActivity: CreateActivitiesInput = {
       name: "Gym workout",
       duration_minutes: 60,
     };
@@ -209,7 +213,7 @@ describe("Activities", () => {
       const mockInsert = jest.fn();
       const mockSingle = jest.fn();
 
-      //  COUNT QUERY
+
       mockEq.mockResolvedValueOnce({
         count: 0,
         error: null,
@@ -219,7 +223,7 @@ describe("Activities", () => {
         eq: mockEq,
       });
 
-      //  INSERT QUERY
+
       mockSingle.mockResolvedValueOnce({
         data: {
           ...newActivity,
@@ -261,7 +265,7 @@ describe("Activities", () => {
       const mockInsert = jest.fn();
       const mockSingle = jest.fn();
 
-      //  COUNT QUERY
+
       mockEq.mockResolvedValueOnce({
         count: 0,
         error: null,
@@ -271,7 +275,7 @@ describe("Activities", () => {
         eq: mockEq,
       });
 
-      //  INSERT QUERY
+      
       mockSingle.mockResolvedValueOnce({
         data: null,
         error: { message: "Failed to create new activity" },
@@ -299,13 +303,14 @@ describe("Activities", () => {
     });
   });
   describe("PATH /api/:challengeId/activities/:activityId", () => {
-    const activityUpdate = {
+    const activityUpdate: UpdateActivitiesInput = {
       name: "Name updated",
       duration_minutes: 10,
     };
     it("returns updated activity for a valid request ", async () => {
       const expectedUpdatedActivity: Activities = {
-        ...activityUpdate,
+        name: activityUpdate.name!,
+        duration_minutes: activityUpdate.duration_minutes!,
         id: fakeActivityId,
         user_id: fakeUserId,
         challenge_id: fakeChallengeId,

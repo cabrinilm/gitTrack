@@ -1,7 +1,7 @@
 import request from "supertest";
 import app from "../../src/server";
+import type { Activities, CreateActivitiesInput, UpdateActivitiesInput } from "../../src/types/activities.types";
 import {
-  Activities,
   createActivity,
   deleteActivity,
   getActivities,
@@ -288,13 +288,14 @@ describe("Activities", () => {
     });
   });
   describe("PATCH /api/challenges/:challengeId/activities/:activityId", () => {
-    const update = {
+    const update: UpdateActivitiesInput = {
       name: "Gym workout",
       duration_minutes: 60,
     };
     it("returns 200 and the updated activity when update is successful", async () => {
       const expectedUpdatedActivity: Activities = {
-        ...update,
+        name: update.name!,
+        duration_minutes: update.duration_minutes!,
         id: fakeActivityId,
         user_id: fakeUserId,
         challenge_id: fakeChallengeId,
