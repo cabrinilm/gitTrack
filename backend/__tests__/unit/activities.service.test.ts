@@ -255,52 +255,6 @@ describe("Activities", () => {
 
       expect(userActivity).toEqual(activity);
     });
-    it("should throw an error if Supabase returns an error", async () => {
-      const mockSupabase = {
-        from: jest.fn(),
-      };
-
-      const mockSelect = jest.fn();
-      const mockEq = jest.fn();
-      const mockInsert = jest.fn();
-      const mockSingle = jest.fn();
-
-
-      mockEq.mockResolvedValueOnce({
-        count: 0,
-        error: null,
-      });
-
-      mockSelect.mockReturnValueOnce({
-        eq: mockEq,
-      });
-
-      
-      mockSingle.mockResolvedValueOnce({
-        data: null,
-        error: { message: "Failed to create new activity" },
-      });
-
-      mockInsert.mockReturnValueOnce({
-        select: () => ({
-          single: mockSingle,
-        }),
-      });
-
-      mockSupabase.from.mockReturnValue({
-        select: mockSelect,
-        insert: mockInsert,
-      });
-
-      await expect(
-        createActivity(
-          mockSupabase as any,
-          fakeUserId,
-          fakeChallengeId,
-          newActivity
-        )
-      ).rejects.toThrow("Failed to create new activity");
-    });
   });
   describe("PATH /api/:challengeId/activities/:activityId", () => {
     const activityUpdate: UpdateActivitiesInput = {

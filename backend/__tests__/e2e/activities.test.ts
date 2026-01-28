@@ -19,7 +19,7 @@ describe("Activities", () => {
   let userAId: string;
   let userBId: string;
   let challengeId: number;
-  const testNamePrefix = "Test Challenge";
+  
 
   const authHeaderUserA = { Authorization: `Bearer ${bearerTokenUserA}` };
   const authHeaderUserB = { Authorization: `Bearer ${bearerTokenUserB}` };
@@ -51,8 +51,7 @@ describe("Activities", () => {
 
     const { data: userAData } = await supabaseUserA.auth.getUser();
     const { data: userBData } = await supabaseUserB.auth.getUser();
-    console.log("DB user:", userAData);
-    console.log("DB user:", userBData);
+  
 
     if (!userAData.user || !userBData.user) {
       throw new Error("Users not found");
@@ -73,11 +72,11 @@ describe("Activities", () => {
     challengeId = challengeRes.body.id;
   });
   afterEach(async () => {
-    // await supabaseUserA
-    //   .from("activities")
-    //   .delete()
-    //   .eq("challenge_id", challengeId);
-    // await supabaseUserA.from("challenges").delete().eq("id", challengeId);
+    await supabaseUserA
+      .from("activities")
+      .delete()
+      .eq("challenge_id", challengeId);
+    await supabaseUserA.from("challenges").delete().eq("id", challengeId);
   });
 
   describe("POST /api/challenges/:challengeId/activities", () => {
@@ -102,7 +101,7 @@ describe("Activities", () => {
         order_num: res.body.order_num,
       });
     });
-    it.only("should not allow user create activity with another users challengeId", async () => {
+    it("should not allow user create activity with another users challengeId", async () => {
       const res = await makeRequest(
         "post",
         `/api/challenges/${challengeId}/activities`,

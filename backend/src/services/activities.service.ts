@@ -78,7 +78,7 @@ export async function createActivity(
 
   if (error || !data) {
     console.error("Supabase error creating activity:", error);
-    throw new Error("Failed to create new activity");
+    throw error;
   }
 
   return data;

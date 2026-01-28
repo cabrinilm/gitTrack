@@ -60,7 +60,7 @@ export const activateMyChallenge = async (
 
     res.status(201).json(result);
   }catch (error: any) {
-    // Garante que error.message existe antes de usar includes
+  
     const message = error?.message ?? "";
     if (message.includes("Forbidden")) {
       res.status(403).json({ error: message });
