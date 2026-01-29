@@ -14,7 +14,7 @@ export async function postFulfillActivity(
   activityId: number
 ) {
   const today = new Date().toISOString().split("T")[0];
-
+console.log("User ID antes da RPC:", userId, typeof userId);
   const { data: progressEntryId, error: entryError } = await supabase.rpc(
     "get_or_create_progress_entry",
     {

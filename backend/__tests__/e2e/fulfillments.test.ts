@@ -79,7 +79,7 @@ describe("Fulfillments", () => {
       );
       challengeId = challengeRes.body.id;
 
-
+ console.log(challengeId, "challengeId");
       const newActivity: CreateActivitiesInput ={
         name: "Gym workout",
         duration_minutes: 60,
@@ -99,9 +99,12 @@ describe("Fulfillments", () => {
       const activityRes2= await makeRequest("post", `/api/challenges/${challengeId}/activities`, newActivity2, authHeaderUserA);
       const activityRes3= await makeRequest("post", `/api/challenges/${challengeId}/activities`, newActivity3, authHeaderUserA);
     
-      activityId1 = activityRes1.body.id
-      activityId2 = activityRes2.body.id
-      activityId3 = activityRes3.body.id
+      activityId1 = activityRes1.body.id;
+      activityId2 = activityRes2.body.id;
+      activityId3 = activityRes3.body.id;
+ console.log(activityId1, "<---activityId")
+      
+     
     
     
     });
@@ -113,9 +116,15 @@ describe("Fulfillments", () => {
       await supabaseUserA.from("challenges").delete().eq("id", challengeId);
     });
     describe("POST /api/progress/fulfillments", () => {
-        it("should fulfill the marked activities",  async () => {
 
-            const res = await makeRequest("post", "/api/progress/fulfillments", {activityId1}, authHeaderUserA ).expect(201)
+       
+        it("should fulfill the marked activities",  async () => {
+           const body = {
+        activityId:activityId1
+      };
+
+      
+            const res = await makeRequest("post", "/api/progress/fulfillments", body, authHeaderUserA).expect(201)
 
         });
     });
