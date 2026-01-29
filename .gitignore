@@ -5,3 +5,4 @@ get-jwt.js
 obs.md
 backend/src/types/supabase.ts
 coverage
+.env.test
