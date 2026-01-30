@@ -11,8 +11,7 @@ export const postMyFulfillActivity = async (
       const supabase = req.supabase;
       const userId = req.user?.id;
       const activityId = Number(req.body.activityId);
-    console.log("Body recebido no controller:", req.body);
-console.log("activityId extraído:", activityId, typeof activityId);
+ 
       if (!supabase) {
         res.status(500).json({ error: "Supabase client not found in request" });
         return;

@@ -14,7 +14,7 @@ export async function postFulfillActivity(
   activityId: number
 ) {
   const today = new Date().toISOString().split("T")[0];
-console.log("User ID antes da RPC:", userId, typeof userId);
+
   const { data: progressEntryId, error: entryError } = await supabase.rpc(
     "get_or_create_progress_entry",
     {
@@ -43,8 +43,12 @@ console.log("User ID antes da RPC:", userId, typeof userId);
   if (activityError || !activity) {
     throw new Error("Activity not found or does not belong to you");
   }
-
-  const { data: fulfillment, error: fulfillError } = await supabase
+console.log(progressEntryNum, "progress entry num")
+console.log(activityId, "ACTIVITY ID")
+console.log(activity.name, "activity name")
+console.log(activity.duration_minutes, "duration minutes")
+console.log(new Date().toISOString())
+const { data: fulfillment, error: fulfillError } = await supabase
     .from("daily_activity_fulfillments")
     .insert({
       progress_entry_id: progressEntryNum,

@@ -102,7 +102,7 @@ describe("Fulfillments", () => {
       activityId1 = activityRes1.body.id;
       activityId2 = activityRes2.body.id;
       activityId3 = activityRes3.body.id;
- console.log(activityId1, "<---activityId")
+
       
      
     
