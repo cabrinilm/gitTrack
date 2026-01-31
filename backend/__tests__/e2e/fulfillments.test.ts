@@ -134,14 +134,14 @@ describe("Fulfillments", () => {
         authHeaderUserA,
       ).expect(201);
 
-      expect(res.body).toMatchObject({
+      expect(res.body.fulfillment).toMatchObject({
         activity_id: activityId1,
         activity_name: "Gym workout",
         planned_duration_minutes: 60,
       });
 
-      expect(res.body.id).toBeDefined();
-      expect(res.body.created_at).toBeDefined();
+      expect(res.body.fulfillment.id).toBeDefined();
+      expect(res.body.fulfillment.fulfilled_at).toBeDefined();
     });
   });
 });

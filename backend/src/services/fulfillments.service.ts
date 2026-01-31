@@ -11,7 +11,7 @@ export type HeatmapDay = {
 export async function postFulfillActivity(
   supabase: SupabaseClient<Database>,
   userId: string,
-  activityId: number
+  activityId: number,
 ) {
   const today = new Date().toISOString().split("T")[0];
 
@@ -20,7 +20,7 @@ export async function postFulfillActivity(
     {
       p_user_id: userId,
       p_today: today,
-    }
+    },
   );
 
   if (entryError || !progressEntryId) {
@@ -43,12 +43,8 @@ export async function postFulfillActivity(
   if (activityError || !activity) {
     throw new Error("Activity not found or does not belong to you");
   }
-console.log(progressEntryNum, "progress entry num")
-console.log(activityId, "ACTIVITY ID")
-console.log(activity.name, "activity name")
-console.log(activity.duration_minutes, "duration minutes")
-console.log(new Date().toISOString())
-const { data: fulfillment, error: fulfillError } = await supabase
+
+  const { data: fulfillment, error: fulfillError } = await supabase
     .from("daily_activity_fulfillments")
     .insert({
       progress_entry_id: progressEntryNum,
@@ -78,7 +74,7 @@ const { data: fulfillment, error: fulfillError } = await supabase
 export async function getFulfillmentsByDate(
   supabase: SupabaseClient<Database>,
   userId: string,
-  date: string
+  date: string,
 ): Promise<Fulfillments[]> {
   const { data: progressEntry, error: entryError } = await supabase
     .from("progress_entries")
@@ -115,14 +111,13 @@ export async function getFulfillmentsByDate(
 export async function getHeatmapData(
   supabase: SupabaseClient<Database>,
   userId: string,
-  year?: number
+  year?: number,
 ): Promise<HeatmapDay[]> {
   const selectedYear = year ?? new Date().getFullYear();
 
   const startOfYear = new Date(selectedYear, 0, 1);
   const endOfYear = new Date(selectedYear, 11, 31);
 
-  
   const { data, error } = await supabase.rpc("get_heatmap_data", {
     p_user_id: userId,
     p_start_date: startOfYear.toISOString().split("T")[0],
@@ -138,7 +133,7 @@ export async function getHeatmapData(
 
   function generateFullYear(
     year: number,
-    existingData: { date: string; count: number }[]
+    existingData: { date: string; count: number }[],
   ): HeatmapDay[] {
     const map = new Map(existingData.map((d) => [d.date, d.count]));
 
@@ -148,7 +143,7 @@ export async function getHeatmapData(
     const end = new Date(year + 1, 0, 1);
 
     const daysInYear = Math.floor(
-      (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
+      (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24),
     );
 
     for (let i = 0; i < daysInYear; i++) {
@@ -160,11 +155,10 @@ export async function getHeatmapData(
         date: dateStr,
         count: map.get(dateStr) || 0,
       });
-    };
+    }
 
     return result;
-  };
-
+  }
 
   return generateFullYear(selectedYear, heatmapData);
-};
+}
