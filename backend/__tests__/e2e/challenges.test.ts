@@ -3,7 +3,6 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import app from "../../src/server";
 import dotenv from "dotenv";
 import { Database } from "../../src/types/supabase";
-// import { Challenges } from "../../src/services/challenges.service";
 import { CreateChallengeInput } from "../../src/types/challenges.types";
 
 dotenv.config();

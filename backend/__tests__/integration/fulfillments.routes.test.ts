@@ -6,6 +6,7 @@ import {
   getHeatmapData,
   postFulfillActivity,
 } from "../../src/services/fulfillments.service";
+import type { Fulfillments } from "../../src/types/fulfillments.type";
 
 jest.mock("../../src/services/fulfillments.service");
 jest.mock("../../src/services/supabaseClient");

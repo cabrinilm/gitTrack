@@ -1,7 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../types/supabase";
-export type Fulfillments =
-  Database["public"]["Tables"]["daily_activity_fulfillments"]["Row"];
+import type { Fulfillments } from "../types/fulfillments.type";
 
 export type HeatmapDay = {
   date: string;
@@ -161,4 +160,4 @@ export async function getHeatmapData(
   }
 
   return generateFullYear(selectedYear, heatmapData);
-}
+};

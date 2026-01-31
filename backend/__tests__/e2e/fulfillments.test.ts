@@ -143,5 +143,8 @@ describe("Fulfillments", () => {
       expect(res.body.fulfillment.id).toBeDefined();
       expect(res.body.fulfillment.fulfilled_at).toBeDefined();
     });
+    it("should not allow user B markers activity from user A",  async () => {
+      
+    })
   });
 });
