@@ -121,8 +121,7 @@ const authHeaderUserB = { Authorization: `Bearer ${bearerTokenUserB}` };
       ).expect(201);
     
       const challengeId = challengeRes.body.id;
-    console.log(userAId)
-   console.log(userBId)
+
       await makeRequest(
         "post",
         `/api/challenges/${challengeId}/activate`,
