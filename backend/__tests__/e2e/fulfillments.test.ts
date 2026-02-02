@@ -152,8 +152,8 @@ describe("Fulfillments", () => {
 
       const res = await makeRequest("post", "/api/progress/fulfillments", body, authHeaderUserB
     
-      ).expect(500)
-      console.log(res.body.error)
+      ).expect(404)
+    
     });
   });
 });

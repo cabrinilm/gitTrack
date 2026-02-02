@@ -1,7 +1,8 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../types/supabase";
 import type { Fulfillments } from "../types/fulfillments.type";
-
+import { ForbiddenError } from "../errors/ForbidenError";
+import { NotFoundError } from "../errors/NotFoundError";
 export type HeatmapDay = {
   date: string;
   count: number;
@@ -39,10 +40,17 @@ export async function postFulfillActivity(
     .eq("user_id", userId)
     .single();
 
-  if (activityError || !activity) {
-    throw new Error("Activity not found or does not belong to you");
-  }
+  
 
+ if (activityError?.code === "PGRST116" || !activity) {
+  throw new NotFoundError("Activity not found");
+}
+
+if (activityError) {
+  throw activityError; 
+}
+
+ console.log("4")
   const { data: fulfillment, error: fulfillError } = await supabase
     .from("daily_activity_fulfillments")
     .insert({
