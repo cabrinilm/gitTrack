@@ -75,7 +75,7 @@ describe("Fulfillments", () => {
     );
     challengeId = challengeRes.body.id;
 
-    console.log(challengeId, "challengeId");
+ 
     const newActivity: CreateActivitiesInput = {
       name: "Gym workout",
       duration_minutes: 60,
@@ -122,8 +122,10 @@ describe("Fulfillments", () => {
     await supabaseUserA.from("challenges").delete().eq("id", challengeId);
   });
   describe("POST /api/progress/fulfillments", () => {
+
+       
     it("should fulfill the marked activities", async () => {
-      const body = {
+        const body = {
         activityId: activityId1,
       };
 
@@ -144,7 +146,14 @@ describe("Fulfillments", () => {
       expect(res.body.fulfillment.fulfilled_at).toBeDefined();
     });
     it("should not allow user B markers activity from user A",  async () => {
-      
-    })
+           const body = {
+        activityId: activityId1,
+      };
+
+      const res = await makeRequest("post", "/api/progress/fulfillments", body, authHeaderUserB
+    
+      ).expect(500)
+      console.log(res.body.error)
+    });
   });
 });

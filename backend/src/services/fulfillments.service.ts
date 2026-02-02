@@ -83,10 +83,12 @@ export async function getFulfillmentsByDate(
     .single();
 
   if (entryError) {
+    console.log("1")
     console.error("Error fetching progress entry:", entryError);
+    
     throw new Error("Failed to fetch progress entry for the date");
   }
-
+console.log("2")
   if (!progressEntry) {
     return [];
   }
