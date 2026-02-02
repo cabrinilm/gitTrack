@@ -131,7 +131,7 @@ describe("Active_challenge", () => {
         .set("Authorization", "Bearer any-fake-token")
         .expect(500);
 
-      expect(response.body.error).toBe("Failed to update activate challenge");
+      expect(response.body.error).toBe("Failed to update active challenge");
     });
   });
   describe("DELETE /api/activate-challenge", () => {

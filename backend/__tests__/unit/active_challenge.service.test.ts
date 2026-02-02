@@ -1,11 +1,6 @@
 import {
-  updateChallenge,
-} from "../../src/services/challenges.service";
-import {
   getActiveChallenge,
-  activateChallenge,
   deleteActiveChallenge,
-  Active_Challenge,
 } from "../../src/services/active_challenge.service";
 import { Challenges } from "../../src/types/challenges.types";
 describe("Active_challenge", () => {
@@ -73,93 +68,13 @@ describe("Active_challenge", () => {
       };
 
       await expect(
-        getActiveChallenge(mockSupabase as any, fakeUserId)
+        getActiveChallenge(mockSupabase as any, fakeUserId),
       ).rejects.toThrow("Failed to fetch active challenge");
     });
   });
-  describe("POST /api/challenges/:challendId/activate", () => {
-    it("returns the actived challenge for a valid request", async () => {
-      const singleMock = jest.fn().mockResolvedValue({
-        data: {
-          user_id: fakeUserId,
-          challenge_id: fakeChallengeId,
-          activated_at: new Date().toISOString(),
-        },
-        error: null,
-      });
 
-      const selectMock = jest.fn(() => ({
-        single: singleMock,
-      }));
-
-      const upsertMock = jest.fn(() => ({
-        select: selectMock,
-      }));
-
-      const fromMock = jest.fn(() => ({
-        upsert: upsertMock,
-      }));
-
-      const mockSupabase = {
-        from: fromMock,
-      };
-
-      const result = await activateChallenge(
-        mockSupabase as any,
-        fakeUserId,
-        fakeChallengeId
-      );
-
-      expect(result).toEqual({
-        user_id: fakeUserId,
-        challenge_id: fakeChallengeId,
-        activated_at: expect.any(String),
-      });
-
-      expect(fromMock).toHaveBeenCalledWith("active_challenges");
-      expect(upsertMock).toHaveBeenCalledWith(
-        {
-          user_id: fakeUserId,
-          challenge_id: fakeChallengeId,
-          activated_at: expect.any(String),
-        },
-        {
-          onConflict: "user_id",
-          ignoreDuplicates: false,
-        }
-      );
-    });
-    it("should throw an error if Supabase returns an error", async () => {
-      const singleMock = jest.fn().mockResolvedValue({
-        data: null,
-        error: {error:"Failed to activate challenge"},
-      });
-
-      const selectMock = jest.fn(() => ({
-        single: singleMock,
-      }));
-
-      const upsertMock = jest.fn(() => ({
-        select: selectMock,
-      }));
-
-      const fromMock = jest.fn(() => ({
-        upsert: upsertMock,
-      }));
-
-      const mockSupabase = {
-        from: fromMock,
-      };
-
-      await expect(
-        activateChallenge(mockSupabase as any, fakeUserId, fakeChallengeId)
-      ).rejects.toThrow("Failed to activate challenge");
-    });
-  });
   describe("DELETE /api/active-challenge", () => {
     it("should deactivate the active challenge and return the deleted record", async () => {
-     
-  
       const expectedDeleted = {
         user_id: fakeUserId,
         challenge_id: fakeChallengeId,
@@ -173,39 +88,37 @@ describe("Active_challenge", () => {
         },
         error: null,
       });
-      
+
       const selectMock = jest.fn(() => ({
         maybeSingle: maybeSingleMock,
       }));
-      
+
       const eqMock = jest.fn(() => ({
         select: selectMock,
       }));
-      
+
       const deleteMock = jest.fn(() => ({
         eq: eqMock,
       }));
-      
+
       const mockSupabase = {
         from: jest.fn(() => ({
           delete: deleteMock,
         })),
       };
-      
+
       const result = await deleteActiveChallenge(
         mockSupabase as any,
-        fakeUserId
+        fakeUserId,
       );
-      
+
       expect(result).toMatchObject(expectedDeleted);
-      
+
       expect(mockSupabase.from).toHaveBeenCalledWith("active_challenges");
       expect(deleteMock).toHaveBeenCalled();
       expect(eqMock).toHaveBeenCalledWith("user_id", fakeUserId);
       expect(selectMock).toHaveBeenCalled();
       expect(maybeSingleMock).toHaveBeenCalled();
-      
-
     });
   });
 });

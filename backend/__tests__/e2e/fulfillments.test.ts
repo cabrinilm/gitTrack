@@ -115,11 +115,28 @@ describe("Fulfillments", () => {
     activityId3 = activityRes3.body.id;
   });
   afterEach(async () => {
-    await supabaseUserA
-      .from("activities")
-      .delete()
-      .eq("challenge_id", challengeId);
-    await supabaseUserA.from("challenges").delete().eq("id", challengeId);
+  await supabaseUserA
+    .from("daily_activity_fulfillments")
+    .delete()
+    .in("activity_id", [activityId1, activityId2, activityId3]);
+
+ 
+  await supabaseUserA
+    .from("progress_entries")
+    .delete()
+    .eq("user_id", userAId);
+
+ 
+  await supabaseUserA
+    .from("activities")
+    .delete()
+    .eq("challenge_id", challengeId);
+
+ 
+  await supabaseUserA
+    .from("challenges")
+    .delete()
+    .eq("id", challengeId);
   });
   describe("POST /api/progress/fulfillments", () => {
 
@@ -145,14 +162,14 @@ describe("Fulfillments", () => {
       expect(res.body.fulfillment.id).toBeDefined();
       expect(res.body.fulfillment.fulfilled_at).toBeDefined();
     });
-    it("should not allow user B markers activity from user A",  async () => {
+    it("returns 404 when trying to fulfill an activity outside user scope",  async () => {
            const body = {
         activityId: activityId1,
       };
 
       const res = await makeRequest("post", "/api/progress/fulfillments", body, authHeaderUserB
     
-      ).expect(404)
+      ).expect(404);
     
     });
   });
