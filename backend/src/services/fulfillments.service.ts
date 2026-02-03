@@ -50,7 +50,6 @@ if (activityError) {
   throw activityError; 
 }
 
- console.log("4")
   const { data: fulfillment, error: fulfillError } = await supabase
     .from("daily_activity_fulfillments")
     .insert({
@@ -88,15 +87,12 @@ export async function getFulfillmentsByDate(
     .select("id")
     .eq("user_id", userId)
     .eq("entry_date", date)
-    .single();
-
-  if (entryError) {
-    console.log("1")
-    console.error("Error fetching progress entry:", entryError);
-    
-    throw new Error("Failed to fetch progress entry for the date");
+    .maybeSingle()
+ 
+  if(entryError){
+    throw new Error("Failed to fetch progress entry")
   }
-console.log("2")
+
   if (!progressEntry) {
     return [];
   }
@@ -113,7 +109,7 @@ console.log("2")
     console.error("Error fetching fulfillments:", fulfillError);
     throw new Error("Failed to fetch fulfillments for the date");
   }
-
+ 
   return fulfillments ?? [];
 }
 

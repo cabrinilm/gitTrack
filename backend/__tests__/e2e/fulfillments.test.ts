@@ -173,4 +173,59 @@ describe("Fulfillments", () => {
     
     });
   });
+  describe("GET /api/progress/fulfillments", () => {
+    it.only("should display fulfilled activities", async () => {
+           const body = {
+        activityId: activityId1,
+      };
+           const bodyActivityPost = {
+        activityId: activityId2,
+      };
+           const bodyActivityPost2 = {
+        activityId: activityId3,
+      };
+
+
+  const resPostActvity1 = await makeRequest(
+        "post",
+        "/api/progress/fulfillments",
+        body,
+        authHeaderUserA,
+      ).expect(201);
+
+        const resPostActvity2 = await makeRequest(
+        "post",
+        "/api/progress/fulfillments",
+        bodyActivityPost,
+        authHeaderUserA,
+      ).expect(201);
+
+        const resPostActvity3 = await makeRequest(
+        "post",
+        "/api/progress/fulfillments",
+        bodyActivityPost2,
+        authHeaderUserA,
+      ).expect(201);
+
+
+      const res = await makeRequest("get", "/api/progress/2026-02-03/fulfillments", undefined, authHeaderUserA).expect(200);
+
+          expect(res.body.fulfillments).toMatchObject([{
+        activity_id: activityId1,
+        activity_name: "Gym workout",
+        planned_duration_minutes: 60,
+      },{
+        activity_id: activityId2,
+        activity_name: "Gym workout",
+        planned_duration_minutes: 60,
+      },{
+        activity_id: activityId3,
+        activity_name: "Gym workout",
+        planned_duration_minutes: 60,
+      }]);
+
+
+
+    })
+  })
 });

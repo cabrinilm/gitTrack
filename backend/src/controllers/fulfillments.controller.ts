@@ -52,7 +52,7 @@ export const getMyFulfillActivitiesByDate = async (
     const supabase = req.supabase;
     const userId = req.user?.id;
     const date = req.params.date;
-
+  
     if (!supabase) {
       res.status(500).json({ error: "Supabase client not found" });
       return;
@@ -76,11 +76,11 @@ export const getMyFulfillActivitiesByDate = async (
     const result = await getFulfillmentsByDate(supabase, userId, date);
 
     res.status(200).json({ fulfillments: result });
-  } catch (error) {
-    console.error("Error fetching fulfillments by date:", error);
-    res
-      .status(500)
-      .json({ error: "Failed to fetch fulfillments for the date" });
+  } catch(error){
+     console.error(error);
+  res.status(500).json({
+    error: "Failed to fetch fulfillments for the date",
+  });
   }
 };
 
