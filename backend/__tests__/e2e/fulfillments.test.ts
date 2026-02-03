@@ -167,6 +167,9 @@ describe("Fulfillments", () => {
     });
   });
   describe("GET /api/progress/fulfillments", () => {
+
+    const today = new Date().toISOString().split("T")[0];
+
     it("should display fulfilled activities", async () => {
       const body = {
         activityId: activityId1,
@@ -202,7 +205,7 @@ describe("Fulfillments", () => {
 
       const res = await makeRequest(
         "get",
-        "/api/progress/2026-02-03/fulfillments",
+        `/api/progress/${today}/fulfillments`,
         undefined,
         authHeaderUserA,
       ).expect(200);
@@ -228,7 +231,7 @@ describe("Fulfillments", () => {
     it("should return empty array if no activity is fulfilled at the day", async () => {
        const res = await makeRequest(
         "get",
-        "/api/progress/2026-02-03/fulfillments",
+         `/api/progress/${today}/fulfillments`,
         undefined,
         authHeaderUserA,
       ).expect(200);
