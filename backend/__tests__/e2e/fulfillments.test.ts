@@ -40,7 +40,7 @@ describe("Fulfillments", () => {
     return req;
   };
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     if (!bearerTokenUserA || !bearerTokenUserB) {
       throw new Error("Missing bearer tokens");
     }
@@ -75,7 +75,6 @@ describe("Fulfillments", () => {
     );
     challengeId = challengeRes.body.id;
 
- 
     const newActivity: CreateActivitiesInput = {
       name: "Gym workout",
       duration_minutes: 60,
@@ -115,34 +114,26 @@ describe("Fulfillments", () => {
     activityId3 = activityRes3.body.id;
   });
   afterEach(async () => {
-  await supabaseUserA
-    .from("daily_activity_fulfillments")
-    .delete()
-    .in("activity_id", [activityId1, activityId2, activityId3]);
+    await supabaseUserA
+      .from("daily_activity_fulfillments")
+      .delete()
+      .in("activity_id", [activityId1, activityId2, activityId3]);
 
- 
-  await supabaseUserA
-    .from("progress_entries")
-    .delete()
-    .eq("user_id", userAId);
+    await supabaseUserA
+      .from("progress_entries")
+      .delete()
+      .eq("user_id", userAId);
 
- 
-  await supabaseUserA
-    .from("activities")
-    .delete()
-    .eq("challenge_id", challengeId);
+    await supabaseUserA
+      .from("activities")
+      .delete()
+      .eq("challenge_id", challengeId);
 
- 
-  await supabaseUserA
-    .from("challenges")
-    .delete()
-    .eq("id", challengeId);
+    await supabaseUserA.from("challenges").delete().eq("id", challengeId);
   });
   describe("POST /api/progress/fulfillments", () => {
-
-       
     it("should fulfill the marked activities", async () => {
-        const body = {
+      const body = {
         activityId: activityId1,
       };
 
@@ -162,70 +153,87 @@ describe("Fulfillments", () => {
       expect(res.body.fulfillment.id).toBeDefined();
       expect(res.body.fulfillment.fulfilled_at).toBeDefined();
     });
-    it("returns 404 when trying to fulfill an activity outside user scope",  async () => {
-           const body = {
+    it("returns 404 when trying to fulfill an activity outside user scope", async () => {
+      const body = {
         activityId: activityId1,
       };
 
-      const res = await makeRequest("post", "/api/progress/fulfillments", body, authHeaderUserB
-    
+      const res = await makeRequest(
+        "post",
+        "/api/progress/fulfillments",
+        body,
+        authHeaderUserB,
       ).expect(404);
-    
     });
   });
   describe("GET /api/progress/fulfillments", () => {
-    it.only("should display fulfilled activities", async () => {
-           const body = {
+    it("should display fulfilled activities", async () => {
+      const body = {
         activityId: activityId1,
       };
-           const bodyActivityPost = {
+      const bodyActivityPost = {
         activityId: activityId2,
       };
-           const bodyActivityPost2 = {
+      const bodyActivityPost2 = {
         activityId: activityId3,
       };
 
-
-  const resPostActvity1 = await makeRequest(
+      const resPostActvity1 = await makeRequest(
         "post",
         "/api/progress/fulfillments",
         body,
         authHeaderUserA,
       ).expect(201);
 
-        const resPostActvity2 = await makeRequest(
+
+      const resPostActvity2 = await makeRequest(
         "post",
         "/api/progress/fulfillments",
         bodyActivityPost,
         authHeaderUserA,
       ).expect(201);
 
-        const resPostActvity3 = await makeRequest(
+      const resPostActvity3 = await makeRequest(
         "post",
         "/api/progress/fulfillments",
         bodyActivityPost2,
         authHeaderUserA,
       ).expect(201);
 
+      const res = await makeRequest(
+        "get",
+        "/api/progress/2026-02-03/fulfillments",
+        undefined,
+        authHeaderUserA,
+      ).expect(200);
 
-      const res = await makeRequest("get", "/api/progress/2026-02-03/fulfillments", undefined, authHeaderUserA).expect(200);
+      expect(res.body.fulfillments).toMatchObject([
+        {
+          activity_id: activityId1,
+          activity_name: "Gym workout",
+          planned_duration_minutes: 60,
+        },
+        {
+          activity_id: activityId2,
+          activity_name: "Gym workout",
+          planned_duration_minutes: 60,
+        },
+        {
+          activity_id: activityId3,
+          activity_name: "Gym workout",
+          planned_duration_minutes: 60,
+        },
+      ]);
+    });
+    it("should return empty array if no activity is fulfilled at the day", async () => {
+       const res = await makeRequest(
+        "get",
+        "/api/progress/2026-02-03/fulfillments",
+        undefined,
+        authHeaderUserA,
+      ).expect(200);
 
-          expect(res.body.fulfillments).toMatchObject([{
-        activity_id: activityId1,
-        activity_name: "Gym workout",
-        planned_duration_minutes: 60,
-      },{
-        activity_id: activityId2,
-        activity_name: "Gym workout",
-        planned_duration_minutes: 60,
-      },{
-        activity_id: activityId3,
-        activity_name: "Gym workout",
-        planned_duration_minutes: 60,
-      }]);
-
-
-
+      expect(res.body.fulfillments).toEqual([])
     })
-  })
+  });
 });
