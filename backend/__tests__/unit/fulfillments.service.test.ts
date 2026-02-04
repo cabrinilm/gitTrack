@@ -118,14 +118,14 @@ describe("Fulfillments Service", () => {
         },
       ];
 
-      const mockSingle = jest.fn().mockResolvedValue({
+      const mockMaybeSingle = jest.fn().mockResolvedValue({
         data: { id: fakeProgressEntryId },
         error: null,
       });
 
       const mockEqProgress = jest.fn().mockReturnValue({
         eq: jest.fn().mockReturnValue({
-          single: mockSingle,
+          maybeSingle: mockMaybeSingle,
         }),
       });
 
@@ -175,14 +175,14 @@ describe("Fulfillments Service", () => {
     it("returns an empty array when no fulfillments exist for the date", async () => {
       const fakeEmptyFulfillments: any[] = [];
 
-      const mockSingle = jest.fn().mockResolvedValue({
+      const mockMaybeSingle = jest.fn().mockResolvedValue({
         data: { id: fakeProgressEntryId },
         error: null,
       });
 
       const mockEqProgress = jest.fn().mockReturnValue({
         eq: jest.fn().mockReturnValue({
-          single: mockSingle,
+          maybeSingle: mockMaybeSingle,
         }),
       });
 
