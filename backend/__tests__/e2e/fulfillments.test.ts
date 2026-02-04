@@ -128,7 +128,11 @@ describe("Fulfillments", () => {
       .delete()
       .eq("user_id", userAId);
 
- 
+     await supabaseUserB
+      .from("progress_entries")
+      .delete()
+      .eq("user_id", userBId);
+      
     await supabaseUserA
       .from("activities")
       .delete()
@@ -145,7 +149,7 @@ describe("Fulfillments", () => {
   }
   });
   describe("POST /api/progress/fulfillments", () => {
-    it.only("should fulfill the marked activities", async () => {
+    it("should fulfill the marked activities", async () => {
       const body = {
         activityId: activityId1,
       };
@@ -166,18 +170,18 @@ describe("Fulfillments", () => {
       expect(res.body.fulfillment.id).toBeDefined();
       expect(res.body.fulfillment.fulfilled_at).toBeDefined();
     });
-    // it("returns 404 when trying to fulfill an activity outside user scope", async () => {
-    //   const body = {
-    //     activityId: activityId1,
-    //   };
+    it("returns 404 when trying to fulfill an activity outside user scope", async () => {
+      const body = {
+        activityId: activityId1,
+      };
 
-    //   const res = await makeRequest(
-    //     "post",
-    //     "/api/progress/fulfillments",
-    //     body,
-    //     authHeaderUserB,
-    //   ).expect(404);
-    // });
+      const res = await makeRequest(
+        "post",
+        "/api/progress/fulfillments",
+        body,
+        authHeaderUserB,
+      ).expect(404);
+    });
   });
   describe("GET /api/progress/fulfillments", () => {
     const today = new Date().toISOString().split("T")[0];
