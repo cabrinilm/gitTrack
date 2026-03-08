@@ -15,6 +15,8 @@ export const postMyFulfillActivity = async (
     const userId = req.user?.id;
     const activityId = Number(req.body.activityId);
 
+  console.log(req.body)
+  console.log(activityId)
 
     if (!supabase) {
       res.status(500).json({ error: "Supabase client not found in request" });
