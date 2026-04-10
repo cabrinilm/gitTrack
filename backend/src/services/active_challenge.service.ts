@@ -24,7 +24,7 @@ export async function getActiveChallenge(
       `
     )
     .eq("user_id", userId)
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error("Error fetching active challenge:", error);

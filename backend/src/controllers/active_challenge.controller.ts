@@ -40,7 +40,7 @@ export const activateMyChallenge = async (
     const supabase = req.supabase;
     const userId = req.user?.id;
     const challengeId = Number(req.params.challengeId);
-
+  console.log(challengeId)
     if (!supabase) {
       res.status(500).json({ error: "Supabase client not found in request" });
       return;

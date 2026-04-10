@@ -89,6 +89,7 @@ export const createMyChallenge = async (
     }
 
     const parsed = postChallengeSchema.safeParse(req.body);
+  
 
     if (!parsed.success) {
       res.status(400).json({
