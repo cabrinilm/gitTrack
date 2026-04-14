@@ -28,9 +28,9 @@ export async function getChallengeById(
     .from("challenges")
     .select("*")
     .eq("user_id", userId)
-    .eq("challenge_id", challengeId)
-    .single();
-
+    .eq("id", challengeId)
+    .maybeSingle();
+  
   if (error) {
     throw new Error("Failed to fetch challenge");
   }
