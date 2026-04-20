@@ -3,6 +3,7 @@ import {
   getFulfillmentsByDate,
   getHeatmapData,
   postFulfillActivity,
+  getUserStreak
 } from "../services/fulfillments.service";
 import { AppError } from "../errors/AppError";
 
@@ -112,5 +113,33 @@ export const getMyHeatMapData = async (
     res.status(200).json(result);
   } catch {
     res.status(500).json({ error: "Failed to load the heat map" });
+  }
+};
+
+
+export const getMyStreak = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const supabase = req.supabase;
+    const userId = req.user?.id;
+
+    if (!supabase) {
+      res.status(500).json({ error: "Supabase client not found in request" });
+      return;
+    }
+
+    if (!userId) {
+      res.status(401).json({ error: "Unauthorized: No user ID found" });
+      return;
+    }
+
+    const streak = await getUserStreak(supabase, userId);
+
+    res.status(200).json(streak);
+  } catch (error) {
+      console.error(error);
+    res.status(500).json({ error: "Failed to fetch streak" });
   }
 };

@@ -167,3 +167,71 @@ export async function getHeatmapData(
 
   return generateFullYear(selectedYear, heatmapData);
 };
+
+function formatDateKey(date: Date): string {
+  return date.toISOString().split("T")[0];
+}
+
+function getPreviousDateKey(dateKey: string): string {
+  const date = new Date(`${dateKey}T00:00:00.000Z`);
+  date.setUTCDate(date.getUTCDate() - 1);
+  return formatDateKey(date);
+}
+
+export function calculateStreakFromDates(
+  dateKeys: string[],
+): { streak: number; completedToday: boolean } {
+  const todayKey = formatDateKey(new Date());
+  const uniqueDates = new Set(dateKeys);
+
+  const completedToday = uniqueDates.has(todayKey);
+
+  const startDate = completedToday
+    ? todayKey
+    : getPreviousDateKey(todayKey);
+
+  if (!uniqueDates.has(startDate)) {
+    return {
+      streak: 0,
+      completedToday,
+    };
+  }
+
+  let streak = 0;
+  let currentDate = startDate;
+
+  while (uniqueDates.has(currentDate)) {
+    streak++;
+    currentDate = getPreviousDateKey(currentDate);
+  }
+
+  return {
+    streak,
+    completedToday,
+  };
+}
+
+
+
+
+
+export async function getUserStreak(
+  supabase: SupabaseClient<Database>,
+  userId: string
+): Promise<{ streak: number; completedToday: boolean }> {
+  const { data, error } = await supabase
+    .from("progress_entries")
+    .select("entry_date, daily_activity_fulfillments!inner(id)")
+    .eq("user_id", userId);
+
+  if (error) {
+    throw new Error("Failed to fetch streak");
+  }
+
+  // Keep only dates that have at least one fulfillment
+  const dateKeys = (data ?? [])
+    .filter((row) => row.daily_activity_fulfillments.length > 0)
+    .map((row) => row.entry_date);
+
+  return calculateStreakFromDates(dateKeys);
+}

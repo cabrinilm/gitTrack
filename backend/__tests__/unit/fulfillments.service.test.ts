@@ -2,6 +2,7 @@ import {
   postFulfillActivity,
   getFulfillmentsByDate,
   getHeatmapData,
+  calculateStreakFromDates
 } from "../../src/services/fulfillments.service";
 
 
@@ -298,4 +299,76 @@ describe("Fulfillments Service", () => {
       ).rejects.toThrow("Failed to fetch heatmap data");
     });
   });
+   describe.only("GET /api/progress/streak", () => {
+  beforeAll(() => {
+    jest.useFakeTimers().setSystemTime(new Date("2025-03-20T10:00:00.000Z"));
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  it("returns a streak of 3 when today and the previous 2 days have fulfillments", () => {
+    const result = calculateStreakFromDates([
+      "2025-03-20",
+      "2025-03-19",
+      "2025-03-18",
+    ]);
+
+    expect(result).toEqual({
+      streak: 3,
+      completedToday: true,
+    });
+  });
+
+  it("returns a streak of 3 when today has no fulfillment but yesterday and the previous 2 days do", () => {
+    const result = calculateStreakFromDates([
+      "2025-03-19",
+      "2025-03-18",
+      "2025-03-17",
+    ]);
+
+    expect(result).toEqual({
+      streak: 3,
+      completedToday: false,
+    });
+  });
+  it("returns a streak of 0 when yesterday has no fulfillment", () => {
+  const result = calculateStreakFromDates([
+    "2025-03-18",
+    "2025-03-17",
+  ]);
+
+  expect(result).toEqual({
+    streak: 0,
+    completedToday: false,
+  });
 });
+it("counts multiple fulfillments on the same day as a single streak day", () => {
+  const result = calculateStreakFromDates([
+    "2025-03-20",
+    "2025-03-20",
+    "2025-03-19",
+    "2025-03-19",
+    "2025-03-18",
+  ]);
+
+  expect(result).toEqual({
+    streak: 3,
+    completedToday: true,
+  });
+});
+it("returns a streak of 0 when there are no fulfillment dates", () => {
+  const result = calculateStreakFromDates([]);
+
+  expect(result).toEqual({
+    streak: 0,
+    completedToday: false,
+  });
+});
+});  
+  });
+
+
+
+
