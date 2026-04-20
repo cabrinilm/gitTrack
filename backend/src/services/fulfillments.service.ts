@@ -1,7 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../types/supabase";
 import type { Fulfillments } from "../types/fulfillments.type";
-import { ForbiddenError } from "../errors/ForbidenError";
 import { NotFoundError } from "../errors/NotFoundError";
 export type HeatmapDay = {
   date: string;
@@ -213,25 +212,43 @@ export function calculateStreakFromDates(
 
 
 
-
-
 export async function getUserStreak(
   supabase: SupabaseClient<Database>,
-  userId: string
+  userId: string,
 ): Promise<{ streak: number; completedToday: boolean }> {
-  const { data, error } = await supabase
+  const { data: progressEntries, error: progressEntriesError } = await supabase
     .from("progress_entries")
-    .select("entry_date, daily_activity_fulfillments!inner(id)")
+    .select("id, entry_date")
     .eq("user_id", userId);
 
-  if (error) {
+  if (progressEntriesError) {
+    console.error("Error fetching progress entries for streak:", progressEntriesError);
     throw new Error("Failed to fetch streak");
   }
 
-  // Keep only dates that have at least one fulfillment
-  const dateKeys = (data ?? [])
-    .filter((row) => row.daily_activity_fulfillments.length > 0)
-    .map((row) => row.entry_date);
+  if (!progressEntries || progressEntries.length === 0) {
+    return calculateStreakFromDates([]);
+  }
+
+  const progressEntryIds = progressEntries.map((entry) => entry.id);
+
+  const { data: fulfillments, error: fulfillmentsError } = await supabase
+    .from("daily_activity_fulfillments")
+    .select("progress_entry_id")
+    .in("progress_entry_id", progressEntryIds);
+
+  if (fulfillmentsError) {
+    console.error("Error fetching fulfillments for streak:", fulfillmentsError);
+    throw new Error("Failed to fetch streak");
+  }
+
+  const fulfilledEntryIds = new Set(
+    (fulfillments ?? []).map((fulfillment) => fulfillment.progress_entry_id),
+  );
+
+  const dateKeys = progressEntries
+    .filter((entry) => fulfilledEntryIds.has(entry.id))
+    .map((entry) => entry.entry_date);
 
   return calculateStreakFromDates(dateKeys);
 }
