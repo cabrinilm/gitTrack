@@ -4,6 +4,7 @@ import { supabase } from "../../src/services/supabaseClient";
 import {
   getFulfillmentsByDate,
   getHeatmapData,
+  getUserStreak,
   postFulfillActivity,
 } from "../../src/services/fulfillments.service";
 import type { Fulfillments } from "../../src/types/fulfillments.type";
@@ -18,7 +19,7 @@ describe("Fulfillments", () => {
   const fakeProgressEntryId = 3;
   const fakeDate = "2025-03-20";
 
-  const fakeFulfillments = [
+  const fakeFulfillments: Fulfillments[] = [
     {
       id: 1,
       progress_entry_id: fakeProgressEntryId,
@@ -43,6 +44,8 @@ describe("Fulfillments", () => {
   };
 
   beforeEach(() => {
+    jest.clearAllMocks();
+
     (supabase.auth.getUser as jest.Mock).mockResolvedValue({
       data: { user: { id: fakeUserId } },
       error: null,
@@ -85,6 +88,7 @@ describe("Fulfillments", () => {
         progressEntryId: fakeProgressEntryId,
       });
     });
+
     it("returns 401 if no token is provided", async () => {
       const response = await request(app)
         .get("/api/progress/active-challenge")
@@ -92,6 +96,7 @@ describe("Fulfillments", () => {
 
       expect(response.body.error).toEqual("No token provided");
     });
+
     it("returns 400 if no activity id is provided", async () => {
       const response = await request(app)
         .post(`/api/progress/fulfillments`)
@@ -100,9 +105,10 @@ describe("Fulfillments", () => {
         .expect(400);
 
       expect(response.body.error).toEqual(
-        "activityId must be a positive integer"
+        "activityId must be a positive integer",
       );
     });
+
     it("returns 400 if  activity id is a negative number", async () => {
       const response = await request(app)
         .post(`/api/progress/fulfillments`)
@@ -111,9 +117,10 @@ describe("Fulfillments", () => {
         .expect(400);
 
       expect(response.body.error).toEqual(
-        "activityId must be a positive integer"
+        "activityId must be a positive integer",
       );
     });
+
     it("returns 400 if  activity id is zero", async () => {
       const response = await request(app)
         .post(`/api/progress/fulfillments`)
@@ -122,9 +129,10 @@ describe("Fulfillments", () => {
         .expect(400);
 
       expect(response.body.error).toEqual(
-        "activityId must be a positive integer"
+        "activityId must be a positive integer",
       );
     });
+
     it("returns 400 if  activity id is a string", async () => {
       const response = await request(app)
         .post(`/api/progress/fulfillments`)
@@ -133,12 +141,13 @@ describe("Fulfillments", () => {
         .expect(400);
 
       expect(response.body.error).toEqual(
-        "activityId must be a positive integer"
+        "activityId must be a positive integer",
       );
     });
+
     it("returns 500 if an unexpected server error occurs", async () => {
       (postFulfillActivity as jest.Mock).mockRejectedValue(
-        new Error("Failed to fulfill activity")
+        new Error("Failed to fulfill activity"),
       );
 
       const response = await request(app)
@@ -150,6 +159,7 @@ describe("Fulfillments", () => {
       expect(response.body.error).toBe("Failed to fulfill activity");
     });
   });
+
   describe("GET /api/progress/:date/fulfillments", () => {
     it("returns 200 and and the fulfillments for the selected date", async () => {
       (getFulfillmentsByDate as jest.Mock).mockResolvedValue(fakeFulfillments);
@@ -163,9 +173,10 @@ describe("Fulfillments", () => {
       expect(getFulfillmentsByDate).toHaveBeenCalledWith(
         expect.any(Object),
         fakeUserId,
-        fakeDate
+        fakeDate,
       );
     });
+
     it("returns 200 and empty array when no fulfillments exist for the date", async () => {
       (getFulfillmentsByDate as jest.Mock).mockResolvedValue([]);
 
@@ -179,9 +190,10 @@ describe("Fulfillments", () => {
       expect(getFulfillmentsByDate).toHaveBeenCalledWith(
         expect.any(Object),
         fakeUserId,
-        fakeDate
+        fakeDate,
       );
     });
+
     it("returns 401 if no token is provided", async () => {
       const response = await request(app)
         .get(`/api/progress/${fakeDate}/fulfillments`)
@@ -189,12 +201,14 @@ describe("Fulfillments", () => {
 
       expect(response.body.error).toEqual("No token provided");
     });
+
     it("returns 404 when date is missing", async () => {
-      const response = await request(app)
+      await request(app)
         .get("/api/progress/fulfillments")
         .set("Authorization", "Bearer any-fake-token")
         .expect(404);
     });
+
     it("returns 400 when date format is invalid", async () => {
       const response = await request(app)
         .get("/api/progress/invalid-date/fulfillments")
@@ -203,9 +217,10 @@ describe("Fulfillments", () => {
 
       expect(response.body.error).toBe("Invalid date format. Use YYYY-MM-DD");
     });
+
     it("returns 500 if an unexpected server error occurs", async () => {
       (getFulfillmentsByDate as jest.Mock).mockRejectedValue(
-        new Error("Failed to fetch fulfillments for the date")
+        new Error("Failed to fetch fulfillments for the date"),
       );
 
       const response = await request(app)
@@ -214,75 +229,119 @@ describe("Fulfillments", () => {
         .expect(500);
 
       expect(response.body.error).toBe(
-        "Failed to fetch fulfillments for the date"
+        "Failed to fetch fulfillments for the date",
       );
     });
-    describe("GET /api/progress/heatmap", () => {
-      const fakeHeatmapData = [
-        { date: "2025-01-01", count: 3 },
-        { date: "2025-03-19", count: 1 },
-      ];
+  });
 
-      it("returns 200 and the all activities marked as completed between a year", async () => {
-        (getHeatmapData as jest.Mock).mockResolvedValue(fakeHeatmapData);
+  describe("GET /api/progress/heatmap", () => {
+    const fakeHeatmapData = [
+      { date: "2025-01-01", count: 3 },
+      { date: "2025-03-19", count: 1 },
+    ];
 
-        const response = await request(app)
-          .get("/api/progress/heatmap")
-          .set("Authorization", "Bearer any-fake-token")
-          .expect(200);
+    it("returns 200 and the all activities marked as completed between a year", async () => {
+      (getHeatmapData as jest.Mock).mockResolvedValue(fakeHeatmapData);
 
-        expect(response.body).toEqual(fakeHeatmapData);
-        expect(getHeatmapData).toHaveBeenCalledTimes(1);
-        expect(getHeatmapData).toHaveBeenCalledWith(
-          expect.any(Object),
-          expect.any(String),
-          undefined
-        );
-      });
-      it("returns 200 and heatmap data for a specific year", async () => {
-        (getHeatmapData as jest.Mock).mockResolvedValue(fakeHeatmapData);
+      const response = await request(app)
+        .get("/api/progress/heatmap")
+        .set("Authorization", "Bearer any-fake-token")
+        .expect(200);
 
-        await request(app)
-          .get("/api/progress/heatmap?year=2025")
-          .set("Authorization", "Bearer any-fake-token")
-          .expect(200);
+      expect(response.body).toEqual(fakeHeatmapData);
+      expect(getHeatmapData).toHaveBeenCalledTimes(1);
+      expect(getHeatmapData).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.any(String),
+        undefined,
+      );
+    });
 
-        expect(getHeatmapData).toHaveBeenCalledWith(
-          expect.any(Object),
-          expect.any(String),
-          2025
-        );
-      });
+    it("returns 200 and heatmap data for a specific year", async () => {
+      (getHeatmapData as jest.Mock).mockResolvedValue(fakeHeatmapData);
 
-      it("returns 401 if no token is provided", async () => {
-        const response = await request(app)
-          .get("/api/progress/heatmap")
-          .expect(401);
+      await request(app)
+        .get("/api/progress/heatmap?year=2025")
+        .set("Authorization", "Bearer any-fake-token")
+        .expect(200);
 
-        expect(response.body.error).toEqual("No token provided");
-      });
-      it("returns 400 if year is not a valid number", async () => {
-        const response = await request(app)
-          .get("/api/progress/heatmap?year=abc")
-          .set("Authorization", "Bearer any-fake-token")
-          .expect(400);
+      expect(getHeatmapData).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.any(String),
+        2025,
+      );
+    });
 
-        expect(response.body.error).toEqual("Invalid year");
+    it("returns 401 if no token is provided", async () => {
+      const response = await request(app)
+        .get("/api/progress/heatmap")
+        .expect(401);
 
-        expect(getHeatmapData).not.toHaveBeenCalled();
-      });
-      it("returns 500 when the service throws an error", async () => {
-        (getHeatmapData as jest.Mock).mockRejectedValue(
-          new Error("Failed to fetch heatmap data")
-        );
+      expect(response.body.error).toEqual("No token provided");
+    });
 
-        const response = await request(app)
-          .get("/api/progress/heatmap")
-          .set("Authorization", "Bearer any-fake-token")
-          .expect(500);
+    it("returns 400 if year is not a valid number", async () => {
+      const response = await request(app)
+        .get("/api/progress/heatmap?year=abc")
+        .set("Authorization", "Bearer any-fake-token")
+        .expect(400);
 
-        expect(response.body.error).toEqual("Failed to load the heat map");
-      });
+      expect(response.body.error).toEqual("Invalid year");
+      expect(getHeatmapData).not.toHaveBeenCalled();
+    });
+
+    it("returns 500 when the service throws an error", async () => {
+      (getHeatmapData as jest.Mock).mockRejectedValue(
+        new Error("Failed to fetch heatmap data"),
+      );
+
+      const response = await request(app)
+        .get("/api/progress/heatmap")
+        .set("Authorization", "Bearer any-fake-token")
+        .expect(500);
+
+      expect(response.body.error).toEqual("Failed to load the heat map");
+    });
+  });
+
+  describe("GET /api/progress/streak", () => {
+    it("returns 200 and the current user streak", async () => {
+      const fakeStreak = {
+        streak: 3,
+        completedToday: true,
+      };
+
+      (getUserStreak as jest.Mock).mockResolvedValue(fakeStreak);
+
+      const response = await request(app)
+        .get("/api/progress/streak")
+        .set("Authorization", "Bearer any-fake-token")
+        .expect(200);
+
+      expect(response.body).toEqual(fakeStreak);
+
+      expect(getUserStreak).toHaveBeenCalledWith(expect.any(Object), fakeUserId);
+    });
+
+    it("returns 401 if no token is provided", async () => {
+      const response = await request(app)
+        .get("/api/progress/streak")
+        .expect(401);
+
+      expect(response.body.error).toEqual("No token provided");
+    });
+
+    it("returns 500 when the service throws an error", async () => {
+      (getUserStreak as jest.Mock).mockRejectedValue(
+        new Error("Failed to fetch streak"),
+      );
+
+      const response = await request(app)
+        .get("/api/progress/streak")
+        .set("Authorization", "Bearer any-fake-token")
+        .expect(500);
+
+      expect(response.body.error).toEqual("Failed to fetch streak");
     });
   });
 });
