@@ -1,20 +1,3 @@
-// {
-//   "compilerOptions": {
-//     "target": "ES2020",
-//     "module": "commonjs",
-//     "rootDir": ".",
-//     "outDir": "./api",
-//     "esModuleInterop": true,
-//     "strict": true,
-//     "skipLibCheck": true,
-//     "typeRoots": ["./node_modules/@types", "./src/types"],
-//     "forceConsistentCasingInFileNames": true
-//   },
-//   "include": ["src/**/*", "src/types/**/*.d.ts", "tests/**/*"],
-//   "exclude": ["node_modules", "api", "dist"]
-// }
-
-
 {
   "compilerOptions": {
     "target": "ES2020",
@@ -24,24 +7,8 @@
     "esModuleInterop": true,
     "strict": true,
     "skipLibCheck": true,
-    "types": ["node", "jest"],
+    "types": ["node"],
     "forceConsistentCasingInFileNames": true
-  }
+  },
+  "exclude": ["**/*.test.ts", "**/*.spec.ts", "__tests__"]
 }
-
-
-// {
-//   "compilerOptions": {
-//     "target": "ES2020",
-//     "module": "commonjs",
-//     "rootDir": ".",
-//     "outDir": "./api",
-//     "esModuleInterop": true,
-//     "strict": true,
-//     "skipLibCheck": true,
-//     "types": ["node", "jest"],
-//     "forceConsistentCasingInFileNames": true
-//   },
-//   "include": ["src/**/*", "src/types/**/*.d.ts", "tests/**/*"],
-//   "exclude": ["node_modules", "api", "dist"]
-// }
