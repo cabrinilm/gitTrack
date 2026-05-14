@@ -46,13 +46,19 @@ const allowedOrigins = (process.env.FRONTEND_URLS || '')
 
 app.use(
   cors({
-    origin: true,           
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      console.log(`CORS blocked origin: ${origin}`);
+      return callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'apikey'],
   })
 );
-
 
 app.use(express.json());
 
