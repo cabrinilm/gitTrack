@@ -1,181 +1,150 @@
 # Backend - GitTrack
 
-## 1. Project Overview
+## 🚀 Project Overview
 
-This backend is built with **Node.js** and **TypeScript**, using **Express** as the web framework and **Supabase** as the database and authentication provider.  
-It serves as the core API layer for managing user data, activities, and challenges, providing secure and scalable endpoints for client applications.
+GitTrack Backend is a RESTful API built to support a modern habit-tracking application focused on consistency, challenges, and long-term progress visualization.
 
-**Main technologies:**
-- Node.js
-- TypeScript
-- Express
-- Supabase (PostgreSQL, Authentication, RPC)
-- Zod (data validation)
-- Jest & Supertest (testing)
-- dotenv & cors (environment configuration and CORS handling)
+It handles authentication, challenge management, activity tracking, and heatmap data aggregation, acting as the core logic layer between the frontend and the database.
 
-**Purpose & Responsibilities:**
-- Handle all HTTP requests from the client and orchestrate responses
-- Validate input data and enforce business rules
-- Interact with the Supabase database through a clean and modular service layer
-- Provide isolated, testable business logic
-- Ensure security and proper authentication without exposing sensitive keys
-- Enable automated testing with unit and integration tests
+Built with **Node.js, TypeScript, Express, and Supabase**, the backend follows a clean **service-layer architecture** for better scalability, testability, and maintainability.
 
----
+## 🛠️ Tech Stack
 
-## 2. Project Structure
+### Core Technologies
+- Node.js + TypeScript
+- Express.js
+- Supabase (Authentication + PostgreSQL)
+- Zod (schema validation)
 
-The backend is organized following the **Service Layer Pattern**, keeping controllers, services, and types separate for clarity, modularity, and testability.
+### Testing
+- Jest
+- Supertest
 
-**Folder Descriptions:**
-- **controllers:** Receives requests, validates inputs, handles errors, and sends responses. Controllers remain thin, delegating business logic to services.  
-- **services:** Contain all business logic in isolated, reusable functions. Services interact with the database (Supabase) and perform complex computations like streaks or heatmap aggregations.  
-- **types:** Store TypeScript types for strong typing across the project. Includes types generated from Supabase for database tables and RPC functions.  
-- **server.ts:** The main entry point that initializes Express, sets up middleware, and starts the server.  
-- **tests/unit:** Unit tests targeting isolated service functions. Fast and high coverage.  
-- **tests/integration:** Integration tests that verify full request-to-response flows, including authentication and HTTP status codes.
+### Infrastructure & Utilities
+- dotenv (environment variables)
+- cors (cross-origin requests)
 
----
+### Key Principles
+- Service-layer architecture
+- Thin controllers
+- Centralized validation with Zod
+- Row Level Security (RLS)
 
-## 3. Dependencies
+## 🧠 Architecture
 
-The backend uses a combination of runtime and development dependencies to provide a robust, type-safe, and testable environment.
+The backend follows a **Service Layer Architecture** to ensure clear separation of concerns, scalability, and high testability.
 
-### Runtime Dependencies
-These packages are required for the backend to run:
-- **express** – Web framework for handling HTTP requests and routing  
-- **@supabase/supabase-js** – Supabase client for database and authentication operations  
-- **cors** – Middleware to handle Cross-Origin Resource Sharing  
-- **dotenv** – Loads environment variables from a `.env` file  
-- **zod** – Schema validation for request payloads and data validation  
+### Core Layers
 
-### Development Dependencies
-These packages are required for development, testing, and type safety:
-- **typescript** – Adds TypeScript support  
-- **ts-node-dev** – Runs TypeScript code with automatic restart on changes  
-- **jest** – Testing framework for unit and integration tests  
-- **ts-jest** – TypeScript preprocessor for Jest  
-- **supertest** – HTTP assertions for integration tests  
-- **@types/express, @types/cors, @types/node, @types/jest, @types/supertest** – TypeScript type definitions for the respective packages  
+- **Controllers** — Handle HTTP requests and responses (kept thin)
+- **Services** — Contain all business logic and application rules
+- **Validation** — Zod schemas for request validation and sanitization
+- **Database** — Supabase (PostgreSQL) with Row Level Security (RLS)
 
-> **Note:** `ts-node-dev` is used instead of `nodemon` due to type reading issues with `express.d.ts`.
+### Data Flow
+**Client → Controller → Validation → Service → Supabase → Response**
 
----
+## 📁 Project Structure
 
-## 4. Setup & Run
-
-Follow these steps to set up and run the backend locally:
-
-### 1. Install Dependencies
 ```bash
+src/
+├── controllers/     # HTTP request handlers (thin layer)
+├── services/        # Core business logic and rules
+├── validation/      # Zod validation schemas
+├── routes/          # Express route definitions
+├── middleware/      # Authentication, error handling, etc.
+├── lib/             # Supabase client and configurations
+├── types/           # TypeScript type definitions
+├── utils/           # Helper utilities
+└── server.ts        # Application entry point
+```
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js (LTS version)
+- npm or yarn
+
+```bash
+# Clone the repository
+git clone https://github.com/cabrinilm/gitTrack
+cd backend
+
+# Install dependencies
 npm install
 
+# Setup environment variables
+cp .env.example .env
 
-### 2. Configure Environment Variables
+# Then edit .env with your credentials:
+# SUPABASE_URL=your_supabase_project_url
+# SUPABASE_ANON_KEY=your_supabase_anon_key
+# PORT=3000
 
-Create a `.env` file in the project root with the necessary configuration, for example:
+# Run the development server
+npm run dev
+```
+The app will be available at http://localhost:5173 
 
-```env
-SUPABASE_URL=<your_supabase_url>
-SUPABASE_ANON_KEY=<your_anon_key>
-PORT=3000
 
-### 3. Run the Development Server
+(Optional) Generate JWT for testing:node get-jwt.js
+
+## 🧪 Testing Strategy
+
+The backend follows the **Test Pyramid** approach:
+
+- **Unit Tests** (`tests/unit`): Test business logic in services (Supabase is mocked)
+- **Integration Tests** (`tests/integration`): Test API endpoints and middleware using Supertest
+- **End-to-End Tests** (`tests/e2e`): Full user flows (auth, challenges, activities, heatmaps)
 
 ```bash
-npm run dev
-This starts the server using ts-node-dev, which automatically restarts on file changes.
+# Run all tests
+npm test
+```
 
-4. Generate JWT Token for Testing
-bash
-Copy code
-node get-jwt.js
+## 🗄️ Database & RPC Functions
 
+The backend uses **Supabase (PostgreSQL)** as the primary database, with **Row Level Security (RLS)** enabled on all tables to ensure complete data isolation between users.
 
+### Key Features
+- Authentication handled by Supabase Auth
+- All user data is protected by RLS policies
+- Complex queries and aggregations are performed using **PostgreSQL RPC (Remote Procedure Call) functions**
 
-## 5. Testing Strategy
+### Example: Heatmap Data
+The `get_heatmap_data` RPC function efficiently aggregates daily activity counts for GitHub-style heatmaps, keeping heavy computation at the database level for better performance.
 
-This project follows the **Test Pyramid** approach to ensure code quality, reliability, and fast feedback.
+## 🔐 Authentication & Security
 
-### Unit Tests (`tests/unit/`)
-- Focus: isolated logic in service functions and pure functions  
-- Fast to execute and high coverage  
-- Dependencies are mocked (e.g., Supabase client)  
-- Ensure business logic is correct without hitting the database  
+The backend uses **Supabase Authentication** for secure user management.
 
-### Integration Tests (`tests/integration/`)
-- Focus: full HTTP request flow (middleware → controller → service → response)  
-- Verify authentication, HTTP status codes (200, 400, 401, 404, 500), and response messages  
-- Uses Supertest; selective mocking when appropriate  
-- Ensure routes and database interactions work together correctly  
+### Authentication Flow
+- Users authenticate through Supabase on the frontend
+- The JWT token is sent with every protected request
+- Backend middleware validates the token and extracts the `userId`
 
-### End-to-End Tests (Planned)
-- Will cover critical user flows using a real database or UI-driven tools like Cypress  
-- Provides confidence that the entire system works as expected  
+### Security Features
+- Supabase JWT validation on all protected routes
+- **Row Level Security (RLS)** enforced at the database level
+- Input validation and sanitization using Zod
+- Environment variables for all sensitive configuration
+- No sensitive keys exposed to the frontend
 
-**Benefits of this approach:**
-- Fast feedback on failures  
-- Clear separation between unit and integration issues  
-- High confidence in correctness and maintainability  
-- Security-focused: authentication and critical HTTP behaviors are tested
+**All users are strictly isolated** — each user can only access their own challenges, activities, and data.
 
+## 📋 Status Codes
 
-## 6. Status Codes Reference
+The API uses standard HTTP status codes:
 
-The backend uses standard HTTP status codes to indicate the result of each request.  
-Here is a quick reference:
+| Status Code | Meaning              | Common Use Case                          |
+|-------------|----------------------|------------------------------------------|
+| 200         | OK                   | Request succeeded                        |
+| 201         | Created              | Resource successfully created            |
+| 400         | Bad Request          | Invalid input (usually Zod validation)   |
+| 401         | Unauthorized         | Missing or invalid JWT token             |
+| 403         | Forbidden            | Authenticated but no permission          |
+| 404         | Not Found            | Resource does not exist                  |
+| 500         | Internal Server Error| Unexpected server or database error      |
 
-| Status Code | Meaning             | Example Scenario |
-|------------|-------------------|----------------|
-| 200        | OK                 | Request succeeded, resource returned |
-| 400        | Bad Request        | Invalid data sent by the client (e.g., empty name, wrong format) |
-| 401        | Unauthorized       | No token or invalid token provided |
-| 403        | Forbidden          | Authenticated but lacking permission (e.g., accessing another user's data) |
-| 404        | Not Found          | Resource does not exist (e.g., profile not created yet) |
-| 500        | Internal Server Error | Server or database failure |
-
-> **Note:**  
-> Most 403 and 404 scenarios are handled via input validation (Zod) or Supabase RLS policies to keep routes secure.
+> **Note:** Most `400` errors come from Zod validation. `403` and `404` are often enforced by Supabase RLS policies.
 
 
-
-## 7. Database RPC Functions
-
-The backend uses **PostgreSQL RPC (Remote Procedure Call) functions** to handle complex database operations efficiently.  
-This approach keeps business logic clean, improves performance, and reduces data transfer between the backend and the database.
-
-### Example: `get_heatmap_data`
-
-**Purpose:**  
-Returns a list of dates with activity counts for a user's heatmap (similar to GitHub contribution graphs).
-
-**Why use an RPC function:**  
-- **Performance:** Aggregation happens directly in PostgreSQL, avoiding large data processing in Node.js.  
-- **Reduced data transfer:** Only one row per day is returned, instead of thousands of activity entries.  
-- **Security:** Filters by `user_id` to respect Row-Level Security (RLS).  
-- **Clean code:** The service layer simply calls `.rpc()`, keeping backend code simple and testable.  
-- **Consistency:** Single atomic operation ensures accurate counts.
-
-**SQL Definition:**
-```sql
-CREATE OR REPLACE FUNCTION get_heatmap_data(
-  p_user_id uuid,
-  p_start_date date,
-  p_end_date date
-)
-RETURNS TABLE (date date, count bigint) AS $$
-BEGIN
-  RETURN QUERY
-  SELECT 
-    f.fulfilled_at::date AS date,
-    COUNT(*) AS count
-  FROM daily_activity_fulfillments f
-  JOIN progress_entries pe ON f.progress_entry_id = pe.id
-  WHERE pe.user_id = p_user_id
-    AND f.fulfilled_at >= p_start_date
-    AND f.fulfilled_at < p_end_date
-  GROUP BY f.fulfilled_at::date
-  ORDER BY date DESC;
-END;
-$$ LANGUAGE plpgsql;
