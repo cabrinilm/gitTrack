@@ -14,13 +14,21 @@ const fulfillments_controller_1 = require("./controllers/fulfillments.controller
 const auth_1 = require("./middleware/auth");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
-const allowedOrigins = [
-    process.env.FRONTEND_URL,
-    "http://localhost:5173",
-].filter((origin) => Boolean(origin));
+const allowedOrigins = (process.env.FRONTEND_URLS || '')
+    .split(',')
+    .map(origin => origin.trim())
+    .filter(Boolean);
 app.use((0, cors_1.default)({
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+        console.log(`CORS blocked origin: ${origin}`);
+        return callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'apikey'],
 }));
 app.use(express_1.default.json());
 app.get("/health", (_req, res) => {
@@ -55,6 +63,6 @@ exports.default = app;
 if (process.env.NODE_ENV !== "test") {
     const PORT = Number(process.env.PORT) || 3000;
     app.listen(PORT, () => {
-        console.log(`Backend running at http://localhost:${PORT}`);
+        console.log(`Backend running on port ${PORT}`);
     });
 }
