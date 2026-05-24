@@ -79,31 +79,34 @@ export const createMyChallenge = async (
     const userId = req.user?.id;
 
     if (!supabase) {
-      res.status(500).json({ error: "Supabase client not found in request" });
+      res.status(500).json({ message: "Supabase client not found in request" });
       return;
     }
 
     if (!userId) {
-      res.status(401).json({ error: "Unauthorized: No user ID found" });
+      res.status(401).json({ message: "Unauthorized" });
       return;
     }
 
     const parsed = postChallengeSchema.safeParse(req.body);
-  
 
     if (!parsed.success) {
+      const formatted = parsed.error.flatten();
+
       res.status(400).json({
-        error: "Invalid request body",
-        details: z.treeifyError(parsed.error),
+        message:
+          formatted.formErrors[0] ||
+          Object.values(formatted.fieldErrors).flat()[0] ||
+          "Invalid request",
       });
+
       return;
     }
-   
+
     const normalizedData: CreateChallengeInput = {
       ...parsed.data,
       description: parsed.data.description ?? null,
     };
-    
 
     const newChallenge = await createChallenge(
       supabase,
@@ -113,7 +116,9 @@ export const createMyChallenge = async (
 
     res.status(201).json(newChallenge);
   } catch (error) {
-    res.status(500).json({ error: "Failed to create new challenge" });
+    res.status(500).json({
+      message: "Failed to create new challenge",
+    });
   }
 };
 
